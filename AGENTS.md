@@ -18,19 +18,19 @@ Star counts verified against the live GitHub API on 2026-07-05 (dealbreaker: 34 
 
 | # | SDLC phase | Skill (adopted/authored) | Source + evidence (verified 2026-07-05) | Status |
 |---|---|---|---|---|
-| 1 | Spec-driven development | superpowers + spec-kit | [obra/superpowers](https://github.com/obra/superpowers) ★246,807 · [github/spec-kit](https://github.com/github/spec-kit) ★118,145 | INBOX (Qodo pending) |
-| 2 | Architecture/design (agent systems) | `/agent-architecture` (authored; BMAD-METHOD ★50,096 as reference method — no topology skill exists) | authored | INBOX (Qodo pending) |
-| 3 | Prompt engineering + eval harness | `/prompt-eval` (authored thin wrap of promptfoo) | [promptfoo/promptfoo](https://github.com/promptfoo/promptfoo) ★22,943 | INBOX (Qodo pending) |
-| 4 | MCP build + debug/test | mcp-builder plugin (Anthropic) + `/mcp-debug` (authored wrap of inspector + fastmcp) | [modelcontextprotocol/inspector](https://github.com/modelcontextprotocol/inspector) ★10,282 · [PrefectHQ/fastmcp](https://github.com/PrefectHQ/fastmcp) ★25,981 | INBOX (Qodo pending) |
-| 5 | Agent memory design | planning-with-files (+ agentmemory lib optional) | [OthmanAdi/planning-with-files](https://github.com/OthmanAdi/planning-with-files) ★24,663 · [rohitg00/agentmemory](https://github.com/rohitg00/agentmemory) ★24,589 | INBOX (Qodo pending) |
-| 6 | Knowledge-base construction | `/kb-build` (authored thin wrap of LlamaIndex; council's "graphify ★78k" did NOT resolve on GitHub search — downgraded) | [run-llama/llama_index](https://github.com/run-llama/llama_index) ~50,660★ | INBOX (Qodo pending) |
-| 7 | Agent eval / benchmarking | `/prompt-eval` (same skill: promptfoo + deepeval golden sets) | [confident-ai/deepeval](https://github.com/confident-ai/deepeval) ★16,652 | INBOX (Qodo pending) |
-| 8 | Testing / TDD | superpowers TDD chain + tdd-guard | [nizos/tdd-guard](https://github.com/nizos/tdd-guard) ★2,241 | INBOX (Qodo pending) |
-| 9 | Deployment (scheduled agents, launchd) | `/deploy-scheduled-agent` (authored — nothing credible for macOS launchd; claude-code-action ★8,253 is CI-only) | authored | INBOX (Qodo pending) |
-| 10 | Maintenance / regression | `/regression-wire` (authored wrap: langfuse traces + promptfoo CI) | [langfuse/langfuse](https://github.com/langfuse/langfuse) ★30,468 | INBOX (Qodo pending) |
-| 11 | Social-platform optimization | `knowledge/platforms/*` (sibling-built) + `/platform-playbook-refresh` (authored — council found only weak skills, e.g. blacktwist ★305) | authored + local KB | INBOX (Qodo pending) |
+| 1 | Spec-driven development | superpowers + spec-kit | [obra/superpowers](https://github.com/obra/superpowers) ★246,807 · [github/spec-kit](https://github.com/github/spec-kit) ★118,145 | PROMOTED |
+| 2 | Architecture/design (agent systems) | `/agent-architecture` (authored; BMAD-METHOD ★50,096 as reference method — no topology skill exists) | authored | PROMOTED |
+| 3 | Prompt engineering + eval harness | `/prompt-eval` (authored thin wrap of promptfoo) | [promptfoo/promptfoo](https://github.com/promptfoo/promptfoo) ★22,943 | PROMOTED |
+| 4 | MCP build + debug/test | mcp-builder plugin (Anthropic) + `/mcp-debug` (authored wrap of inspector + fastmcp) | [modelcontextprotocol/inspector](https://github.com/modelcontextprotocol/inspector) ★10,282 · [PrefectHQ/fastmcp](https://github.com/PrefectHQ/fastmcp) ★25,981 | PROMOTED |
+| 5 | Agent memory design | planning-with-files (+ agentmemory lib optional) | [OthmanAdi/planning-with-files](https://github.com/OthmanAdi/planning-with-files) ★24,663 · [rohitg00/agentmemory](https://github.com/rohitg00/agentmemory) ★24,589 | PROMOTED |
+| 6 | Knowledge-base construction | `/kb-build` (authored thin wrap of LlamaIndex; council's "graphify ★78k" did NOT resolve on GitHub search — downgraded) | [run-llama/llama_index](https://github.com/run-llama/llama_index) ~50,660★ | PROMOTED |
+| 7 | Agent eval / benchmarking | `/prompt-eval` (same skill: promptfoo + deepeval golden sets) | [confident-ai/deepeval](https://github.com/confident-ai/deepeval) ★16,652 | PROMOTED |
+| 8 | Testing / TDD | superpowers TDD chain + tdd-guard | [nizos/tdd-guard](https://github.com/nizos/tdd-guard) ★2,241 | PROMOTED |
+| 9 | Deployment (scheduled agents, launchd) | `/deploy-scheduled-agent` (authored — nothing credible for macOS launchd; claude-code-action ★8,253 is CI-only) | authored | PROMOTED |
+| 10 | Maintenance / regression | `/regression-wire` (authored wrap: langfuse traces + promptfoo CI) | [langfuse/langfuse](https://github.com/langfuse/langfuse) ★30,468 | PROMOTED |
+| 11 | Social-platform optimization | `knowledge/platforms/*` (sibling-built) + `/platform-playbook-refresh` (authored — council found only weak skills, e.g. blacktwist ★305) | authored + local KB | PROMOTED |
 
-Acceptance test for this matrix: zero TBD rows, every row's Status is PROMOTED or AUTHORED with a ledger entry. Current gate state: promotion PRs [#1](https://github.com/mitwilli-create/content-ops/pull/1) (7 authored skills) + [#2](https://github.com/mitwilli-create/content-ops/pull/2) (14 superpowers SDLC skills, MIT-attributed) are OPEN awaiting Qodo review — connect the repo once at https://app.qodo.ai, then merge on clean review.
+Acceptance test for this matrix: zero TBD rows, every row's Status is PROMOTED or AUTHORED with a ledger entry. Current gate state: promotion PRs [#1](https://github.com/mitwilli-create/content-ops/pull/1) (7 authored skills) + [#2](https://github.com/mitwilli-create/content-ops/pull/2) (14 superpowers SDLC skills, MIT-attributed) were Qodo-reviewed (no security concerns) and MERGED 2026-07-05 with Mitchell approval — the gate is live end-to-end.
 
 Adoption modes for tool-shaped winners (not vendored): **spec-kit** — `uvx --from git+https://github.com/github/spec-kit.git specify init <project>`; **tdd-guard** — `npm i -g tdd-guard` + hook config per its README; **planning-with-files** — pattern reference (read from quarantine or upstream; its file-based planning patterns are encoded in the authored `agent-architecture` + kb-build skills).
 
