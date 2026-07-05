@@ -1,6 +1,7 @@
 # Discord Playbook
 
-last_verified: 2026-01 (baseline from model knowledge at authoring, 2026-07-05; server lists + invite validity unverified)
+last_verified: 2026-01-31
+notes: baseline from model knowledge at authoring (2026-07-05); server lists + invite validity unverified
 
 **Role in the system:** Relationship depth, not reach. Where AI-dev/builder communities actually help each other. Slow-burn surface: months of presence → invitations, collabs, early readers. Audiences 1-2.
 

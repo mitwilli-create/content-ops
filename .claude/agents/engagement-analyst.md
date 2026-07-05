@@ -11,7 +11,7 @@ Read `data/performance-log.md` for history and `data/story-ledger.md` for what s
 Return three things:
 1. Proposed performance-log entries (date, platform, post, format, hook variant used, window, results, one-line learning) ready for the caller to append.
 2. Learnings worth memory: patterns seen at least twice (a hook style, a window, a format) stated as observations with counts, never as laws from one data point.
-3. Conflicts: any measured result that contradicts a playbook claim in `knowledge/platforms/` — name the doc and line; Mitchell's measured data outranks generic playbook advice, and the conflict routes to /platform-playbook-refresh.
+3. Conflicts: any measured result that contradicts a playbook claim in `knowledge/platforms/` - name the doc and line; Mitchell's measured data outranks generic playbook advice, and the conflict routes to /platform-playbook-refresh.
 
 Framing rules: RSD-safe, forward-looking. A post that underperformed is data about fit and timing, never a verdict on Mitchell or the writing. Lead with what worked before what did not.
 

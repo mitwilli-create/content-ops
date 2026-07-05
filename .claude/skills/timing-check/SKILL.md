@@ -1,6 +1,6 @@
 ---
 name: timing-check
-description: Use before recommending WHEN to post anything — a draft is staged and needs a post window, the user asks "when should this go out", "is now a good time", "should I wait on this", or a scheduling recommendation is about to be made from playbook baselines alone. Playbook timing claims decay in weeks; an unverified window is a guess wearing a timestamp.
+description: Use before recommending WHEN to post anything - a draft is staged and needs a post window, the user asks "when should this go out", "is now a good time", "should I wait on this", or a scheduling recommendation is about to be made from playbook baselines alone. Playbook timing claims decay in weeks; an unverified window is a guess wearing a timestamp.
 ---
 
 # Timing Check

@@ -1,6 +1,7 @@
 # LLM Routing — expanded rationale
 
-last_verified: 2026-01 (baseline from model knowledge at authoring, 2026-07-05; model IDs + pricing drift, verify before relying)
+last_verified: 2026-01-31
+notes: baseline from model knowledge at authoring (2026-07-05); model IDs + pricing drift, verify before relying
 
 Invocation: `node ~/Documents/career-ops/scripts/run-council.mjs` with explicit `--models` (empty flag silently falls back to Sonnet-only — always pass the list). API keys live in career-ops `.env`. Typical full-council run: ~$0.20-0.45.
 

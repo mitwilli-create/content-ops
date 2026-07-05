@@ -1,6 +1,6 @@
 ---
 name: platform-adapt
-description: Use when existing content (a master draft, essay, video script, or published piece) needs versions for specific named platforms — the user says "adapt this for LinkedIn and X", "atomize the Substack piece", "make a TikTok script from this", or a drafts/ dir has a master.md without adaptations for its primary platforms.
+description: Use when existing content (a master draft, essay, video script, or published piece) needs versions for specific named platforms - the user says "adapt this for LinkedIn and X", "atomize the Substack piece", "make a TikTok script from this", or a drafts/ dir has a master.md without adaptations for its primary platforms.
 ---
 
 # Platform Adapt
@@ -9,7 +9,7 @@ Turn one canonical piece into platform-native versions. Adaptation means re-expr
 
 ## Procedure
 
-1. **Freshness gate first.** For each target platform read `knowledge/platforms/<platform>.md` and check `last_verified` (or the dated BASELINE line). Older than 30 days: STOP for that platform and instruct running `/platform-playbook-refresh` on it first. Do not adapt against a stale playbook; this skill never edits playbooks itself (one writer per file class — the writer is `/platform-playbook-refresh`).
+1. **Freshness gate first.** For each target platform read `knowledge/platforms/<platform>.md` and check `last_verified` (or the dated BASELINE line). Older than 30 days: STOP for that platform and instruct running `/platform-playbook-refresh` on it first. Do not adapt against a stale playbook; this skill never edits playbooks itself (one writer per file class - the writer is `/platform-playbook-refresh`).
 2. **Read the playbook's format section** and the audience register in `knowledge/audiences.md` for the platform's primary audience.
 3. **Adapt.** One `platform-adapter` subagent per platform when doing 3+ in parallel (each gets the master text + one playbook + ONE explicit output path); inline for 1-2 platforms. Every adaptation keeps: the core claim, the lived-experience anchor, and the concrete takeaway. Everything else (length, structure, hook style, link handling) obeys the playbook.
 4. **Hooks:** 2-3 hook variants at the top of each adaptation, marked `HOOK A/B/C`, chosen for that platform's scroll context.

@@ -1,6 +1,7 @@
 # The Four Audiences
 
-last_verified: 2026-01 (baseline from model knowledge at authoring, 2026-07-05; no live verification yet)
+last_verified: 2026-01-31
+notes: baseline from model knowledge at authoring (2026-07-05); no live verification yet, so last_verified is pinned to the knowledge baseline and the 30-day staleness gate correctly treats this doc as due for refresh
 
 Every piece targets ONE primary audience. Cross-post adaptations may shift the frame, but a piece written for everyone reaches no one.
 

@@ -1,6 +1,6 @@
 ---
 name: content-review
-description: Use as the pre-publish gate on any content artifact — a draft or adaptation is about to be staged for Mitchell, the user asks "is this ready", "review this post", "check the harness piece", or any drafts/ artifact is about to be marked review/scheduled without a recorded verdict.
+description: Use as the pre-publish gate on any content artifact - a draft or adaptation is about to be staged for Mitchell, the user asks "is this ready", "review this post", "check the harness piece", or any drafts/ artifact is about to be marked review/scheduled without a recorded verdict.
 ---
 
 # Content Review
