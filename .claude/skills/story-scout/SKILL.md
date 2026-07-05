@@ -14,6 +14,7 @@ Mine live conversation for story material and saturation signal. The ledger (`da
 
 ## Scout procedure
 
+0. **Drain capture first.** (a) Gmail sweep: search the connected Gmail MCP for `subject:IDEA newer_than:14d`; append messages newer than the inbox's `<!-- swept-through -->` marker to `data/inbox.md` (`src: email`), then advance the marker. Gmail MCP unavailable in this context: print a notice and continue, never fail. (b) Triage `data/inbox.md`: move each line into `data/story-ledger.md` as a full row (audience, platform guess, angle note, status `idea`), then clear the drained lines. Captured ideas outrank fresh scouting; they are Mitchell's own signal.
 1. Read `data/story-ledger.md`: current ideas, statuses, and the sequencing plan. Scouting serves the ledger, not the feed.
 2. Dispatch the `story-scout` subagent (`run_in_background` fine) with mode + the 3-5 ledger ideas currently most relevant. Sources per CLAUDE.md research tiers:
    - T2 X pulse: `bash scripts/run-council-content.sh <prompt> <out> "xai:grok-4-x-search"` (the third argument is the REQUIRED models list; the wrapper maps it to run-council.mjs `--models` and exits with usage if omitted)

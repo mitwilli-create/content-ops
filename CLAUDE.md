@@ -66,7 +66,8 @@ For high-stakes pieces: draft with Fable 5 → parallel critique from GPT-5 + Ge
 
 ## Skills
 
-- `/story-scout` — mine X/HN/Reddit/news for angles on ledger ideas + net-new ideas
+- `/capture` — zero-friction idea intake to `data/inbox.md` (from any session, any time; `IDEA:` self-emails swept by story-scout)
+- `/story-scout` — drain the capture inbox + Gmail `IDEA:` sweep, then mine X/HN/Reddit/news for angles on ledger ideas + net-new ideas
 - `/draft-post` — take a ledger idea → master draft + platform adaptations
 - `/platform-adapt` — take existing content → adapt for N named platforms
 - `/timing-check` — live-verify posting windows before any schedule recommendation
