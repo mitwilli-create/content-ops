@@ -2,6 +2,7 @@
 
 last_verified: 2026-01-31
 notes: baseline from model knowledge at authoring (2026-07-05); mechanics here are slow-decay but unverified live
+length_window: null
 
 **Role in the system:** Proof-of-work surface. Not a "posting" platform: it's where dev-audience content gets verified. Every technical claim in essays should be one click from runnable evidence. Audience 1-2 + hiring managers.
 

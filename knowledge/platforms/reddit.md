@@ -1,5 +1,7 @@
 # Reddit Playbook
 
+length_window: null
+
 **Role in the system:** Community depth + newly-enabled audience discovery. Per-subreddit culture matters more than any global rule. Audiences 1 and 3.
 
 ## Target subreddits (verify rules before EVERY post — they change)

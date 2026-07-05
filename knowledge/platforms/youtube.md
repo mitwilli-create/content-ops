@@ -1,5 +1,7 @@
 # YouTube Playbook
 
+length_window: null
+
 **Role in the system:** Depth video + search-durable library. The only platform where content appreciates for years (search + suggested). Audiences 2-4. His on-camera + edit skills remove the usual creator bottleneck.
 
 ## Format split

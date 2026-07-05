@@ -1,5 +1,7 @@
 # LinkedIn Playbook
 
+length_window: {"minWords": 80, "maxWords": 380}
+
 **Role in the system:** Professional reach + job-market adjacency (feeds career-ops goals). Audiences 2-4. The exec-disconnect and enablement stories are native here.
 
 ## Format that works

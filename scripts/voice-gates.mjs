@@ -38,9 +38,14 @@ export const GATES = [
 ];
 
 // House per-platform length windows for DRAFT bodies (word counts unless noted).
-// Source: knowledge/platforms/*.md recommendations; update THERE first, then mirror here
-// via /platform-playbook-refresh follow-through. null = no deterministic window.
-export const LENGTH_WINDOWS = {
+// CANONICAL SOURCE: the `length_window: <one-line JSON|null>` header in each
+// knowledge/platforms/<platform>.md (single writer: /platform-playbook-refresh, which
+// updates that line whenever a refresh changes a window). The table below is a RESILIENCE
+// FALLBACK only, used when a playbook is unreadable or lacks the line; a stderr warning
+// fires so the gap is visible. `--check-windows` fails if fallback and playbooks disagree,
+// which forces this table to be updated in the same commit as any playbook window change
+// (Qodo PR #3 alternative #2: generate, don't mirror).
+const FALLBACK_WINDOWS = {
   substack: { minWords: 550, maxWords: 2600 },
   linkedin: { minWords: 80, maxWords: 380 },
   x: { maxChars: 4000 },
@@ -51,6 +56,41 @@ export const LENGTH_WINDOWS = {
   tiktok: { minWords: 50, maxWords: 220 }, // spoken script for 30-90s
   youtube: null,
 };
+
+const PLAYBOOKS_DIR = new URL('../knowledge/platforms/', import.meta.url);
+
+// Returns { windows, problems[] }. problems are strings describing playbooks that are
+// missing, unreadable, missing the length_window line, or carrying unparseable JSON.
+export function loadWindowsFromPlaybooks() {
+  const windows = {};
+  const problems = [];
+  for (const platform of Object.keys(FALLBACK_WINDOWS)) {
+    let text;
+    try {
+      text = readFileSync(new URL(`${platform}.md`, PLAYBOOKS_DIR), 'utf8');
+    } catch (e) {
+      problems.push(`${platform}: playbook unreadable (${e.message})`);
+      continue;
+    }
+    const m = text.match(/^length_window:\s*(.+)\s*$/m);
+    if (!m) {
+      problems.push(`${platform}: no length_window: line in playbook`);
+      continue;
+    }
+    try {
+      windows[platform] = JSON.parse(m[1]);
+    } catch {
+      problems.push(`${platform}: length_window is not valid one-line JSON: ${m[1]}`);
+    }
+  }
+  return { windows, problems };
+}
+
+const _loaded = loadWindowsFromPlaybooks();
+if (_loaded.problems.length > 0) {
+  for (const p of _loaded.problems) console.error(`voice-gates WARNING: ${p}; using fallback window`);
+}
+export const LENGTH_WINDOWS = { ...FALLBACK_WINDOWS, ..._loaded.windows };
 
 const PLATFORM_ALIASES = {
   twitter: 'x',
@@ -125,7 +165,26 @@ export function promptfooAssert(output, platform = null) {
 const isMain = process.argv[1] && import.meta.url.endsWith(process.argv[1].split('/').pop());
 if (isMain) {
   const args = process.argv.slice(2);
-  const usage = 'usage: node scripts/voice-gates.mjs <file> [--platform <name>]';
+  const usage = 'usage: node scripts/voice-gates.mjs <file> [--platform <name>] | --check-windows';
+
+  // Drift check: every playbook must declare a parseable length_window line, and the
+  // resilience fallback table must match the playbooks exactly. Exit 0 clean, 1 on drift.
+  if (args.includes('--check-windows')) {
+    const { windows, problems } = loadWindowsFromPlaybooks();
+    let dirty = [...problems];
+    for (const platform of Object.keys(FALLBACK_WINDOWS)) {
+      if (!(platform in windows)) continue; // already reported in problems
+      const a = JSON.stringify(FALLBACK_WINDOWS[platform]);
+      const b = JSON.stringify(windows[platform]);
+      if (a !== b) dirty.push(`${platform}: fallback ${a} != playbook ${b} (update FALLBACK_WINDOWS in the same commit)`);
+    }
+    if (dirty.length === 0) {
+      console.log(`CLEAN: ${Object.keys(windows).length}/${Object.keys(FALLBACK_WINDOWS).length} playbook windows parse and match the fallback table`);
+      process.exit(0);
+    }
+    for (const d of dirty) console.log(`DRIFT: ${d}`);
+    process.exit(1);
+  }
   let platform = null;
   const pIdx = args.indexOf('--platform');
   if (pIdx !== -1) {

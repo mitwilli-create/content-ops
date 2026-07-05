@@ -1,5 +1,7 @@
 # TikTok Playbook
 
+length_window: {"minWords": 50, "maxWords": 220}
+
 **Role in the system:** Audience-3 reach engine. Where "newly enabled" and general audiences actually discover AI help. Mitchell's broadcast/AJ+ background is a structural advantage: AJ+ vertical-video grammar basically invented this format.
 
 ## Format that works

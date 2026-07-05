@@ -1,5 +1,7 @@
 # Substack Playbook
 
+length_window: {"minWords": 550, "maxWords": 2600}
+
 **Role in the system:** Home base. Every pillar idea becomes a Substack essay FIRST; all other platforms atomize from it. Owns the audience relationship (email list = the only platform-proof asset).
 
 ## Format that works
