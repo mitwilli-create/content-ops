@@ -6,8 +6,9 @@ This file governs the BUILDER side of content-ops: the skills a Claude Code inst
 
 1. **Community-first.** For every SDLC phase, prefer skills built by experienced engineers with verifiable evidence (stars, downloads, ratings, author track record). Mitchell's earlier locally-authored career-ops skills are reference-only.
 2. **Evidence or it didn't happen.** Every adopted skill's evidence is recorded in `docs/skill-adoption-ledger.md`. Unverifiable popularity claims get downgraded.
-3. **Qodo gate is mandatory.** No skill (adopted OR authored) is promoted from `.claude/skills-inbox/` to `.claude/skills/` without passing `scripts/qodo-skill-gate.sh` (quality + security review) AND a functional smoke test. HIGH security finding = REJECT.
-4. **Quarantine flow:** install → `.claude/skills-inbox/<name>/` → Qodo review → smoke test → promote to `.claude/skills/<name>/` → ledger entry.
+3. **Qodo gate is mandatory — PR-review form.** Qodo discontinued its CLI (backend refuses all calls as of 2026-07-05); the working product is automatic PR review on a connected Git repo. Promotion is therefore a PR: `bash scripts/promote-skill.sh <name>...` copies the skill from quarantine into `.claude/skills/` on a `promote/*` branch and opens a PR; Qodo reviews the diff (repo must be connected ONCE at https://app.qodo.ai — Mitchell action); merge only after a clean review + smoke test. HIGH security finding = close the PR, REJECT.
+4. **Quarantine flow:** install → `.claude/skills-inbox/<name>/` (gitignored) → supply-chain pre-scan → smoke test → promotion PR → Qodo review → merge → ledger entry.
+5. **Tool-shaped adoptions are not vendored.** Community winners that are CLIs/libraries rather than SKILL.md dirs (spec-kit, tdd-guard, promptfoo, etc.) get documented install commands here + a wrapping skill where needed — never a full repo copied into `.claude/skills/`.
 
 ## SDLC skill matrix
 
@@ -29,9 +30,11 @@ Star counts verified against the live GitHub API on 2026-07-05 (dealbreaker: 34 
 | 10 | Maintenance / regression | `/regression-wire` (authored wrap: langfuse traces + promptfoo CI) | [langfuse/langfuse](https://github.com/langfuse/langfuse) ★30,468 | INBOX (Qodo pending) |
 | 11 | Social-platform optimization | `knowledge/platforms/*` (sibling-built) + `/platform-playbook-refresh` (authored — council found only weak skills, e.g. blacktwist ★305) | authored + local KB | INBOX (Qodo pending) |
 
-Acceptance test for this matrix: zero TBD rows, every row's Status is PROMOTED or AUTHORED with a ledger entry. Current gate: ALL promotion blocked on Qodo auth (`qodo login` — Mitchell, one-time browser flow), then `bash scripts/qodo-skill-gate.sh .claude/skills-inbox/<name>` per skill.
+Acceptance test for this matrix: zero TBD rows, every row's Status is PROMOTED or AUTHORED with a ledger entry. Current gate state: promotion PRs [#1](https://github.com/mitwilli-create/content-ops/pull/1) (7 authored skills) + [#2](https://github.com/mitwilli-create/content-ops/pull/2) (14 superpowers SDLC skills, MIT-attributed) are OPEN awaiting Qodo review — connect the repo once at https://app.qodo.ai, then merge on clean review.
 
-Retroactive review queue (same gate): the 5 sibling-authored content-agent skills in `.claude/skills/` (story-scout, draft-post, platform-adapt, timing-check, content-review) predate the gate.
+Adoption modes for tool-shaped winners (not vendored): **spec-kit** — `uvx --from git+https://github.com/github/spec-kit.git specify init <project>`; **tdd-guard** — `npm i -g tdd-guard` + hook config per its README; **planning-with-files** — pattern reference (read from quarantine or upstream; its file-based planning patterns are encoded in the authored `agent-architecture` + kb-build skills).
+
+FINDING (2026-07-05): the 5 content-agent skills declared in CLAUDE.md § Skills (story-scout, draft-post, platform-adapt, timing-check, content-review) are EMPTY dirs — declared-but-unbuilt. Build them THROUGH this gate (author in quarantine → promotion PR) as the content agent's next work item.
 
 ## Standing infrastructure (reused, not rebuilt)
 
