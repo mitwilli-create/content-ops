@@ -1,5 +1,9 @@
 # Reddit Playbook
 
+last_verified: 2026-01-31
+notes: subreddit list + rules claims are Jan 2026 baselines; verify per-sub rules before EVERY post regardless
+length_window: null
+
 **Role in the system:** Community depth + newly-enabled audience discovery. Per-subreddit culture matters more than any global rule. Audiences 1 and 3.
 
 ## Target subreddits (verify rules before EVERY post — they change)

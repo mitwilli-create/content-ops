@@ -14,7 +14,7 @@ The playbooks in `knowledge/platforms/` are the content agent's core KB. Every c
    - T1 (WebSearch, 1-3 queries): official changelog/creator-blog checks, "what changed on <platform> algorithm <current quarter>", format/length limit confirmations.
    - T2 (live pulse): `xai:grok-4-x-search` via `scripts/run-council-content.sh` for what's working RIGHT NOW on X; fetch HN front page / relevant subreddit tops directly for those platforms.
    - Do not use T3 deep research here — playbook refresh is breadth + recency, not depth.
-3. **Update the playbook**: every changed claim gets `(as of YYYY-MM)` + source; every SURVIVING claim's date gets re-confirmed or the claim gets flagged `[unverified since YYYY-MM]` rather than silently kept. Update the header `last_verified:`.
+3. **Update the playbook**: every changed claim gets `(as of YYYY-MM)` + source; every SURVIVING claim's date gets re-confirmed or the claim gets flagged `[unverified since YYYY-MM]` rather than silently kept. Update the header `last_verified:`. If the refresh changes a length recommendation, update the header's machine-readable `length_window:` one-line JSON in the SAME edit (it is the canonical source for `scripts/voice-gates.mjs`), update `FALLBACK_WINDOWS` in voice-gates.mjs to match, and run `node scripts/voice-gates.mjs --check-windows` before committing.
 4. **Separate mechanics from experience**: platform mechanics go in the playbook; what MITCHELL's posts actually did goes in `data/performance-log.md`. Never overwrite performance observations during a refresh.
 5. **Cross-platform pass**: timing claims interact (a piece cascades Substack → X → LinkedIn); when one platform's windows move, check the cascade notes in the other playbooks that reference it.
 

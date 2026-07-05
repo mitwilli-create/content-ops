@@ -43,6 +43,15 @@ FINDING (2026-07-05): the 5 content-agent skills declared in CLAUDE.md § Skills
 - Anthropic plugins (first-class): `skill-creator`, `mcp-builder`, `prompt-optimizer`, `prompt-master`, `consolidate-memory`, `engineering:*`.
 - Voice: `make-it-sound-like-mitchell` + `mitchells-voice-style` (global plugins) + CLAUDE.md hard voice rules.
 
+## Detectors (regression checks; every detector documents its kill switch here)
+
+| Detector | Command | What it fails on | Kill switch |
+|---|---|---|---|
+| Voice/format gates | `node scripts/voice-gates.mjs <file> [--platform <p>]` | em dash, banned term, banned idioms, platform length window in the given artifact | none (core gate; bypassing is a per-invocation choice, not an env flag) |
+| Length-window drift | `node scripts/voice-gates.mjs --check-windows` | playbook missing/unparseable/schema-invalid `length_window:` line; fallback table diverging from playbooks; fallback entry with no playbook file | `VOICE_GATES_DISABLE_WINDOW_CHECK=true` (short-circuits, exit 0, prints a disabled notice) |
+
+Canonical window source: the `length_window: <one-line JSON|null>` header in each `knowledge/platforms/*.md` (single writer: `/platform-playbook-refresh`). `scripts/voice-gates.mjs` loads them at import, platform set derived from the directory listing; the in-script table is a warn-loudly resilience fallback only. Run `--check-windows` after any playbook window edit.
+
 ## Conventions
 
 - Skills follow the agentskills.io SKILL.md standard (frontmatter: name, description; body: instructions). Match the structure of the best adopted community skills.

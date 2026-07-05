@@ -1,6 +1,8 @@
 # Hacker News Playbook
 
-last_verified: 2026-07-05 (T1 spot refresh — timing + second-chance-pool claims re-confirmed, no substantive changes; sources: syften.com HN posting guide + HN item 26998308)
+last_verified: 2026-07-05
+notes: T1 spot refresh, timing + second-chance-pool claims re-confirmed, no substantive changes; sources: syften.com HN posting guide + HN item 26998308
+length_window: null
 
 **Role in the system:** Highest-leverage, highest-risk surface. One front-page hit = thousands of dev-audience Substack subs. One marketing-smelling post = credibility damage. Audience 1 only.
 
