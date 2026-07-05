@@ -1,5 +1,7 @@
 # The Four Audiences
 
+last_verified: 2026-01 (baseline from model knowledge at authoring, 2026-07-05; no live verification yet)
+
 Every piece targets ONE primary audience. Cross-post adaptations may shift the frame, but a piece written for everyone reaches no one.
 
 ## 1. AI Developers
@@ -33,3 +35,5 @@ Every piece targets ONE primary audience. Cross-post adaptations may shift the f
 ## Cross-audience mechanics
 - A dev-audience piece can be atomized DOWN (dev essay → builder thread → enabled-audience TikTok explaining one concept). Rarely works upward.
 - The four audiences share ONE thing: they distrust polish. Mitchell's authenticity register (production war stories, real numbers, admitted mistakes) travels across all four.
+
+How to refresh this: T1 (audience profiles decay slowly). Queries: "state of AI developer community <year>", "who is adopting AI tools <year> demographics"; plus T2 pulse via story-scout when a piece underperforms with its target audience. Update via /platform-playbook-refresh conventions (dated claims).
