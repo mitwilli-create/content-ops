@@ -1,0 +1,1 @@
+Skills extracted 2026-07-05 from github.com/obra/superpowers (MIT, Jesse Vincent, ★246,807 verified via live GitHub API). Extracted as standalone skills; the upstream plugin's hook enforcement is not carried over — workflow content only. See docs/skill-adoption-ledger.md.
