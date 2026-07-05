@@ -1,5 +1,7 @@
 # YouTube Playbook
 
+last_verified: 2026-01-31
+notes: format + cadence claims are Jan 2026 baselines from model knowledge; no live verification yet
 length_window: null
 
 **Role in the system:** Depth video + search-durable library. The only platform where content appreciates for years (search + suggested). Audiences 2-4. His on-camera + edit skills remove the usual creator bottleneck.

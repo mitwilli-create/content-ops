@@ -1,5 +1,7 @@
 # Substack Playbook
 
+last_verified: 2026-01-31
+notes: cadence + Notes-meta claims are Jan 2026 baselines from model knowledge; Notes surface shifts fastest
 length_window: {"minWords": 550, "maxWords": 2600}
 
 **Role in the system:** Home base. Every pillar idea becomes a Substack essay FIRST; all other platforms atomize from it. Owns the audience relationship (email list = the only platform-proof asset).

@@ -1,5 +1,7 @@
 # LinkedIn Playbook
 
+last_verified: 2026-01-31
+notes: timing + format claims are Jan 2026 baselines from model knowledge; refresh before first scheduling use
 length_window: {"minWords": 80, "maxWords": 380}
 
 **Role in the system:** Professional reach + job-market adjacency (feeds career-ops goals). Audiences 2-4. The exec-disconnect and enablement stories are native here.

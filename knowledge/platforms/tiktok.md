@@ -1,5 +1,7 @@
 # TikTok Playbook
 
+last_verified: 2026-01-31
+notes: format/algorithm claims are Jan 2026 baselines; TikTok meta shifts fastest of the 9 platforms
 length_window: {"minWords": 50, "maxWords": 220}
 
 **Role in the system:** Audience-3 reach engine. Where "newly enabled" and general audiences actually discover AI help. Mitchell's broadcast/AJ+ background is a structural advantage: AJ+ vertical-video grammar basically invented this format.

@@ -1,5 +1,7 @@
 # X (Twitter) Playbook
 
+last_verified: 2026-01-31
+notes: format + timing claims are Jan 2026 baselines; Grok-pulse before relying on any of them
 length_window: {"maxChars": 4000}
 
 **Role in the system:** Velocity surface. Where AI-dev conversation happens in real time. Audiences 1-2 primary. Trend-timing matters more here than anywhere; ALWAYS Grok-check before posting takes.

@@ -8,7 +8,7 @@
 //         exit 0 = clean, exit 1 = violations (printed one per line), exit 2 = usage/read/platform error
 // Module: import { GATES, LENGTH_WINDOWS, checkText, checkLength, normalizePlatform } from './voice-gates.mjs'
 
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 
 // The banned-term pattern is constructed (not written literally) so this source file itself
 // stays clean under the blanket substring ban (Qodo PR #3 finding 2).
@@ -59,29 +59,67 @@ const FALLBACK_WINDOWS = {
 
 const PLAYBOOKS_DIR = new URL('../knowledge/platforms/', import.meta.url);
 
-// Returns { windows, problems[] }. problems are strings describing playbooks that are
-// missing, unreadable, missing the length_window line, or carrying unparseable JSON.
+// Schema guard (Qodo PR #4 finding 4): a window is null, or a plain non-array object whose
+// only keys are minWords/maxWords/maxChars with positive finite numbers. Anything else is
+// invalid and must NOT override the fallback (a parseable-but-wrong value would fail open:
+// checkLength reads win.minWords etc., all undefined, zero violations).
+const WINDOW_KEYS = new Set(['minWords', 'maxWords', 'maxChars']);
+export function validateWindow(value) {
+  if (value === null) return { ok: true, window: null };
+  if (typeof value !== 'object' || Array.isArray(value)) {
+    return { ok: false, error: 'must be null or a plain object' };
+  }
+  const keys = Object.keys(value);
+  if (keys.length === 0) return { ok: false, error: 'object has no window keys' };
+  for (const k of keys) {
+    if (!WINDOW_KEYS.has(k)) return { ok: false, error: `unknown key "${k}" (allowed: minWords, maxWords, maxChars)` };
+    if (typeof value[k] !== 'number' || !Number.isFinite(value[k]) || value[k] <= 0) {
+      return { ok: false, error: `"${k}" must be a positive finite number` };
+    }
+  }
+  return { ok: true, window: value };
+}
+
+// Returns { windows, problems[] }. The PLATFORM SET is the directory listing of
+// knowledge/platforms/*.md (Qodo PR #4 finding 5: playbooks are canonical, so a new or
+// renamed playbook must be seen here, not just the ones the fallback table knows about).
+// problems: unreadable dir/files, missing length_window lines, unparseable JSON, invalid schema.
 export function loadWindowsFromPlaybooks() {
   const windows = {};
   const problems = [];
-  for (const platform of Object.keys(FALLBACK_WINDOWS)) {
+  let files;
+  try {
+    files = readdirSync(PLAYBOOKS_DIR).filter((f) => f.endsWith('.md'));
+  } catch (e) {
+    return { windows, problems: [`playbooks dir unreadable (${e.message})`] };
+  }
+  for (const file of files) {
+    const platform = file.replace(/\.md$/, '');
     let text;
     try {
-      text = readFileSync(new URL(`${platform}.md`, PLAYBOOKS_DIR), 'utf8');
+      text = readFileSync(new URL(file, PLAYBOOKS_DIR), 'utf8');
     } catch (e) {
       problems.push(`${platform}: playbook unreadable (${e.message})`);
       continue;
     }
-    const m = text.match(/^length_window:\s*(.+)\s*$/m);
+    const m = text.match(/^length_window:\s*(.+?)\s*$/m);
     if (!m) {
       problems.push(`${platform}: no length_window: line in playbook`);
       continue;
     }
+    let parsed;
     try {
-      windows[platform] = JSON.parse(m[1]);
+      parsed = JSON.parse(m[1]);
     } catch {
       problems.push(`${platform}: length_window is not valid one-line JSON: ${m[1]}`);
+      continue;
     }
+    const v = validateWindow(parsed);
+    if (!v.ok) {
+      problems.push(`${platform}: length_window has invalid schema (${v.error}): ${m[1]}`);
+      continue;
+    }
+    windows[platform] = v.window;
   }
   return { windows, problems };
 }
@@ -167,19 +205,31 @@ if (isMain) {
   const args = process.argv.slice(2);
   const usage = 'usage: node scripts/voice-gates.mjs <file> [--platform <name>] | --check-windows';
 
-  // Drift check: every playbook must declare a parseable length_window line, and the
-  // resilience fallback table must match the playbooks exactly. Exit 0 clean, 1 on drift.
+  // Drift check (regression detector): every playbook file must declare a parseable,
+  // schema-valid length_window line; the resilience fallback table must match the playbooks
+  // exactly; and every fallback entry must have a live playbook file (catches renames).
+  // Exit 0 clean, 1 on drift. Kill switch: VOICE_GATES_DISABLE_WINDOW_CHECK=true
+  // (documented in AGENTS.md § Detectors, per the every-detector-has-a-kill-switch rule).
   if (args.includes('--check-windows')) {
+    if (process.env.VOICE_GATES_DISABLE_WINDOW_CHECK === 'true') {
+      console.log('window drift check DISABLED via VOICE_GATES_DISABLE_WINDOW_CHECK=true (no checks ran)');
+      process.exit(0);
+    }
     const { windows, problems } = loadWindowsFromPlaybooks();
-    let dirty = [...problems];
+    const dirty = [...problems];
     for (const platform of Object.keys(FALLBACK_WINDOWS)) {
-      if (!(platform in windows)) continue; // already reported in problems
+      if (!(platform in windows)) {
+        if (!problems.some((p) => p.startsWith(`${platform}:`))) {
+          dirty.push(`${platform}: in FALLBACK_WINDOWS but no playbook file exists (renamed or deleted?)`);
+        }
+        continue;
+      }
       const a = JSON.stringify(FALLBACK_WINDOWS[platform]);
       const b = JSON.stringify(windows[platform]);
       if (a !== b) dirty.push(`${platform}: fallback ${a} != playbook ${b} (update FALLBACK_WINDOWS in the same commit)`);
     }
     if (dirty.length === 0) {
-      console.log(`CLEAN: ${Object.keys(windows).length}/${Object.keys(FALLBACK_WINDOWS).length} playbook windows parse and match the fallback table`);
+      console.log(`CLEAN: ${Object.keys(windows).length} playbook windows parse, pass schema, and match the fallback table`);
       process.exit(0);
     }
     for (const d of dirty) console.log(`DRIFT: ${d}`);
