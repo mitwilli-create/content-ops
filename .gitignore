@@ -1,0 +1,19 @@
+# Personal data — never commit (career-ops pattern)
+data/
+drafts/
+memory/accounts.md
+*.env
+.env*
+!.env.example
+
+# Engagement analytics / platform exports
+analytics/
+exports/
+
+# Quarantine inbox — community skills under review are not ours to commit
+.claude/skills-inbox/
+
+# OS / editor noise
+.DS_Store
+node_modules/
+*.log
