@@ -1,5 +1,8 @@
 # GitHub Playbook
 
+last_verified: 2026-01-31
+notes: baseline from model knowledge at authoring (2026-07-05); mechanics here are slow-decay but unverified live
+
 **Role in the system:** Proof-of-work surface. Not a "posting" platform: it's where dev-audience content gets verified. Every technical claim in essays should be one click from runnable evidence. Audience 1-2 + hiring managers.
 
 ## What works as content
@@ -24,3 +27,5 @@
 ## Cadence
 - Push publicly visible work 3-5 days/week (the green graph is read as a heartbeat by hiring managers and devs alike).
 - Companion repo ships SAME DAY as any technical essay (HN/X will look for it within minutes).
+
+How to refresh this: T1. Queries: "GitHub profile README features <year>", "GitHub discussions/releases changes changelog". GitHub mechanics decay slowest of the 9 platforms; refresh quarterly or when a companion repo underperforms expectations.

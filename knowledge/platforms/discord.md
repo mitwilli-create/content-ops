@@ -1,5 +1,8 @@
 # Discord Playbook
 
+last_verified: 2026-01-31
+notes: baseline from model knowledge at authoring (2026-07-05); server lists + invite validity unverified
+
 **Role in the system:** Relationship depth, not reach. Where AI-dev/builder communities actually help each other. Slow-burn surface: months of presence → invitations, collabs, early readers. Audiences 1-2.
 
 ## Target servers (verify invite/rules currently valid)
@@ -25,3 +28,5 @@
 
 ## Timing
 - Timing is presence-based, not clock-based: consistent 15-20 min daily beats sporadic hours. US evening + weekend activity peaks in maker servers.
+
+How to refresh this: T1 for server lists/invites ("<server> discord invite", vendor community pages); presence norms decay slowly. Refresh via /platform-playbook-refresh before the first outreach push on any listed server.
