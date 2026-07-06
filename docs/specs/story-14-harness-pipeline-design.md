@@ -1,6 +1,6 @@
 # Design: Story #14 pipeline — "What's a harness and why should I build one?"
 
-Produced by following `.claude/skills-inbox/agent-architecture/SKILL.md` end-to-end (smoke test, 2026-07-05). Capability under design: take ledger idea #14 from idea → master draft → platform adaptations → timing recommendation.
+Produced by following the agent-architecture skill end-to-end (smoke test, 2026-07-05; the skill was in quarantine at `.claude/skills-inbox/` during that run and now lives promoted at `.claude/skills/agent-architecture/SKILL.md`). Capability under design: take ledger idea #14 from idea → master draft → platform adaptations → timing recommendation.
 
 ## 1. Problem + audience
 
