@@ -9,6 +9,7 @@
 // Module: import { GATES, LENGTH_WINDOWS, checkText, checkLength, normalizePlatform } from './voice-gates.mjs'
 
 import { readFileSync, readdirSync } from 'node:fs';
+import { pathToFileURL } from 'node:url';
 
 // The banned-term pattern is constructed (not written literally) so this source file itself
 // stays clean under the blanket substring ban (Qodo PR #3 finding 2).
@@ -149,7 +150,9 @@ export function normalizePlatform(input) {
     return { ok: false, error: 'platform is empty' };
   }
   let p = String(input).trim().toLowerCase();
-  if (p in PLATFORM_ALIASES) p = PLATFORM_ALIASES[p];
+  // Own-property check, not `in`: `in` walks the prototype chain, so inputs like
+  // "constructor" or "toString" would resolve to Object.prototype members.
+  if (Object.prototype.hasOwnProperty.call(PLATFORM_ALIASES, p)) p = PLATFORM_ALIASES[p];
   if (p && Object.prototype.hasOwnProperty.call(LENGTH_WINDOWS, p)) {
     return { ok: true, platform: p };
   }
@@ -200,7 +203,9 @@ export function promptfooAssert(output, platform = null) {
 }
 
 // CLI
-const isMain = process.argv[1] && import.meta.url.endsWith(process.argv[1].split('/').pop());
+// Exact entry-point comparison. The old basename endsWith() check would treat this
+// module as the CLI whenever the real entry script merely SHARED its basename.
+const isMain = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
 if (isMain) {
   const args = process.argv.slice(2);
   const usage = 'usage: node scripts/voice-gates.mjs <file> [--platform <name>] | --check-windows';

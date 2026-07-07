@@ -18,15 +18,19 @@ echo "🔍 Searching for test that creates: $POLLUTION_CHECK"
 echo "Test pattern: $TEST_PATTERN"
 echo ""
 
-# Get list of test files
-TEST_FILES=$(find . -path "$TEST_PATTERN" | sort)
-TOTAL=$(echo "$TEST_FILES" | wc -l | tr -d ' ')
+# Get list of test files (array + read -r: filenames with spaces stay intact,
+# and a nonzero find exit, e.g. permission-denied subdirs, can't abort us via set -e)
+TEST_FILES=()
+while IFS= read -r line; do
+  TEST_FILES+=("$line")
+done < <(find . -path "$TEST_PATTERN" 2>/dev/null | sort || true)
+TOTAL=${#TEST_FILES[@]}
 
 echo "Found $TOTAL test files"
 echo ""
 
 COUNT=0
-for TEST_FILE in $TEST_FILES; do
+for TEST_FILE in "${TEST_FILES[@]}"; do
   COUNT=$((COUNT + 1))
 
   # Skip if pollution already exists

@@ -34,7 +34,7 @@ Acceptance test for this matrix: zero TBD rows, every row's Status is PROMOTED o
 
 Adoption modes for tool-shaped winners (not vendored): **spec-kit** — `uvx --from git+https://github.com/github/spec-kit.git specify init <project>`; **tdd-guard** — `npm i -g tdd-guard` + hook config per its README; **planning-with-files** — pattern reference (read from quarantine or upstream; its file-based planning patterns are encoded in the authored `agent-architecture` + kb-build skills).
 
-FINDING (2026-07-05): the 5 content-agent skills declared in CLAUDE.md § Skills (story-scout, draft-post, platform-adapt, timing-check, content-review) are EMPTY dirs — declared-but-unbuilt. Build them THROUGH this gate (author in quarantine → promotion PR) as the content agent's next work item.
+FINDING (2026-07-05, RESOLVED 2026-07-06): the 5 content-agent skills declared in CLAUDE.md § Skills (story-scout, draft-post, platform-adapt, timing-check, content-review) were empty declared-but-unbuilt dirs at first audit. They have since been built through this gate and PROMOTED (PRs #3 and #5, Qodo-reviewed, ledger rows in docs/skill-adoption-ledger.md).
 
 ## Standing infrastructure (reused, not rebuilt)
 
