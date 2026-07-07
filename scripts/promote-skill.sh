@@ -16,21 +16,45 @@ cd "$(dirname "$0")/.."
 
 [[ $# -lt 1 ]] && { echo "usage: $0 <inbox-skill-name> [...]"; exit 2; }
 
-BRANCH="promote/$1$( [[ $# -gt 1 ]] && echo "-and-$(( $# - 1 ))-more" )"
+# Validate names up front: a skill name is a single path segment, never a path.
+# (A name containing / or .. would let rsync read or write outside the inbox/skills dirs.)
+for name in "$@"; do
+  if [[ ! "$name" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ || "$name" == *..* ]]; then
+    echo "invalid skill name: $name (single directory name only, no slashes or ..)"; exit 2
+  fi
+  [[ -d ".claude/skills-inbox/$name" ]] || { echo "not in inbox: $name"; exit 2; }
+done
+
+# NOTE: the suffix must be computed in a plain if, not inline as
+# BRANCH="...$( [[ $# -gt 1 ]] && ... )" — under set -e a failing command
+# substitution in an assignment aborts the script, which made every
+# single-skill invocation exit 1 before doing anything.
+SUFFIX=""
+if [[ $# -gt 1 ]]; then SUFFIX="-and-$(( $# - 1 ))-more"; fi
+BRANCH="promote/$1$SUFFIX"
+START_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 git checkout -b "$BRANCH"
 
+abort() { git checkout "$START_BRANCH"; git branch -D "$BRANCH"; exit 2; }
+
+PROMOTED=0
 for name in "$@"; do
   SRC=".claude/skills-inbox/$name"
-  [[ -d "$SRC" ]] || { echo "not in inbox: $name"; git checkout -; exit 2; }
-  mkdir -p ".claude/skills/$name"
   # Copy only skill content (SKILL.md + scripts/references/assets), never a full vendored repo.
   if [[ -f "$SRC/SKILL.md" ]]; then
+    mkdir -p ".claude/skills/$name"
     rsync -a --exclude='.git' "$SRC/" ".claude/skills/$name/"
   else
     echo "SKIP $name: no SKILL.md at repo root — extract specific skill dirs manually"; continue
   fi
   git add ".claude/skills/$name"
+  PROMOTED=$(( PROMOTED + 1 ))
 done
+
+if [[ $PROMOTED -eq 0 ]] || git diff --cached --quiet; then
+  echo "nothing to promote (no SKILL.md found, or files identical to what is already promoted)"
+  abort
+fi
 
 git commit -m "promote: $* into .claude/skills/ (pending Qodo PR review)
 
