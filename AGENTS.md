@@ -2,6 +2,8 @@
 
 This file governs the BUILDER side of content-ops: the skills a Claude Code instance uses to build and evolve the content-engine agent defined in CLAUDE.md. The content agent itself (voice rules, research tiers, LLM routing) lives in CLAUDE.md; this file is about how we build it correctly.
 
+> **Lane rules (Codex, read first):** `~/Documents/mission-control/WORKSPACE.md` defines the multi-agent lanes for this machine. Your lane here (Codex) is building; Claude Code reviews your output and owns orchestration/memory; CodeRabbit reviews commits and PRs automatically. Non-negotiable in this repo: personal data (`data/`, `drafts/`, `memory/accounts.md`, analytics) is gitignored and never committed; `data/story-ledger.md` follows a byte-preservation contract (mission-control rewrites exactly ONE status cell per kanban move; never restructure it); nothing publishes without Mitchell's manual send.
+
 ## Sourcing policy (locked 2026-07-05)
 
 1. **Community-first.** For every SDLC phase, prefer skills built by experienced engineers with verifiable evidence (stars, downloads, ratings, author track record). Mitchell's earlier locally-authored career-ops skills are reference-only.
