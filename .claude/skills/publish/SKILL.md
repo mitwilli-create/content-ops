@@ -44,5 +44,5 @@ Run all four; do not proceed past a failure.
 ## Rules
 
 - **Never publish autonomously.** Draft, stage, preview, schedule-propose. Mitchell presses send.
-- After it is live, log the URL and any early numbers to `data/performance-log.md` (performance data is the flywheel).
+- After it is live, log the URL and any early numbers to `data/performance-log.md` (the canonical performance log named in CLAUDE.md; `data/` is gitignored, so this analytics stays local and is never committed). Performance data is the flywheel.
 - Everything is parameterized by the draft path. If a step needs a Krieger-specific value, that is a bug: read it from the draft/runbook instead.
