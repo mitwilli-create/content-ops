@@ -72,6 +72,7 @@ For high-stakes pieces: draft with Fable 5 → parallel critique from GPT-5 + Ge
 - `/platform-adapt` — take existing content → adapt for N named platforms
 - `/timing-check` — live-verify posting windows before any schedule recommendation
 - `/content-review` — pre-publish gate: voice, grounding, audience fit, HN-proofing
+- `/publish` — take a content-review-READY draft → live Substack post + LinkedIn cross-post (media at markers, SEO/category/social-preview, link-in-comment). Path-generalized; never auto-publishes. Backed by the durable publish tooling in `scripts/` (see AGENTS.md § Publish tooling)
 
 ## Connectors
 

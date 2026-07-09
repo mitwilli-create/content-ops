@@ -4,12 +4,32 @@
 // Design rule (docs/specs/content-agent-skills-design.md Q3): these patterns exist in exactly ONE
 // committed file. Duplicating them elsewhere is a defect (gate drift = latent false-green).
 //
-// CLI:    node scripts/voice-gates.mjs <file> [--platform <name>]
+// CLI:    node scripts/voice-gates.mjs <file> [--platform <name>] [--published]
 //         exit 0 = clean, exit 1 = violations (printed one per line), exit 2 = usage/read/platform error
-// Module: import { GATES, LENGTH_WINDOWS, checkText, checkLength, normalizePlatform } from './voice-gates.mjs'
+//         --published: strip ::: embed/image marker blocks before checking, so the length gate
+//                      reports the TRUE published word count. Marker blocks are editor instructions,
+//                      not published text; counting them false-tripped the word ceiling and forced a
+//                      separate `awk '/^:::/{b=!b;next}b{next}'` pass on every gate run (retro 2026-07-09).
+// Module: import { GATES, LENGTH_WINDOWS, checkText, checkLength, normalizePlatform, stripEmbedBlocks } from './voice-gates.mjs'
 
 import { readFileSync, readdirSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
+
+// Strip ::: embed/image marker blocks (the MEDIA-EMBED-GUIDE convention: a block opens with a line
+// beginning `:::` and closes with a bare `:::`; both toggle-lines and everything between are removed).
+// This is the canonical definition of "published text" for a draft that carries editor markers, and
+// it is single-sourced HERE so the build tooling (scripts/lib/draft-parse.mjs) and the length gate
+// agree on what counts. Mirrors the historical `awk 'BEGIN{b=0}/^:::/{b=!b;next}b{next}{print}'`.
+export function stripEmbedBlocks(text) {
+  const kept = [];
+  let inBlock = false;
+  for (const line of text.split('\n')) {
+    if (/^:::/.test(line)) { inBlock = !inBlock; continue; }
+    if (inBlock) continue;
+    kept.push(line);
+  }
+  return kept.join('\n');
+}
 
 // The banned-term pattern is constructed (not written literally) so this source file itself
 // stays clean under the blanket substring ban (Qodo PR #3 finding 2).
@@ -162,10 +182,14 @@ export function normalizePlatform(input) {
   };
 }
 
-export function checkText(text) {
+// opts.stripMarkers (default false, non-breaking): check the PUBLISHED text only, i.e. with :::
+// embed/image instruction blocks removed. Module callers keep the old whole-file behavior unless
+// they opt in; the CLI opts in via --published.
+export function checkText(text, opts = {}) {
+  const target = opts.stripMarkers ? stripEmbedBlocks(text) : text;
   const violations = [];
   for (const gate of GATES) {
-    const matches = text.match(gate.pattern);
+    const matches = target.match(gate.pattern);
     if (matches) {
       violations.push({ gate: gate.id, count: matches.length, message: gate.message });
     }
@@ -175,15 +199,17 @@ export function checkText(text) {
 
 // platform is required here; callers that have no platform simply do not call checkLength.
 // An unknown/unnormalizable platform returns a violation (fail-closed), never [].
-export function checkLength(text, platform) {
+// opts.stripMarkers (default false): count the published word/char total (::: blocks removed).
+export function checkLength(text, platform, opts = {}) {
   const norm = normalizePlatform(platform);
   if (!norm.ok) {
     return [{ gate: 'length', count: 1, message: `length gate cannot run: ${norm.error}` }];
   }
   const win = LENGTH_WINDOWS[norm.platform];
   if (!win) return []; // known platform with no deterministic window (intentional, e.g. hackernews)
-  const words = text.trim().split(/\s+/).filter(Boolean).length;
-  const chars = text.length;
+  const target = opts.stripMarkers ? stripEmbedBlocks(text) : text;
+  const words = target.trim().split(/\s+/).filter(Boolean).length;
+  const chars = target.length;
   const violations = [];
   if (win.minWords && words < win.minWords)
     violations.push({ gate: 'length', count: 1, message: `${norm.platform}: ${words} words is under the ${win.minWords}-word floor` });
@@ -208,7 +234,8 @@ export function promptfooAssert(output, platform = null) {
 const isMain = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
 if (isMain) {
   const args = process.argv.slice(2);
-  const usage = 'usage: node scripts/voice-gates.mjs <file> [--platform <name>] | --check-windows';
+  const usage = 'usage: node scripts/voice-gates.mjs <file> [--platform <name>] [--published] | --check-windows';
+  const published = args.includes('--published');
 
   // Drift check (regression detector): every playbook file must declare a parseable,
   // schema-valid length_window line; the resilience fallback table must match the playbooks
@@ -267,9 +294,14 @@ if (isMain) {
     console.error(`cannot read ${file}: ${e.message}`);
     process.exit(2);
   }
-  const violations = [...checkText(text), ...(platform ? checkLength(text, platform) : [])];
+  const opts = { stripMarkers: published };
+  if (published) {
+    const publishedWords = stripEmbedBlocks(text).trim().split(/\s+/).filter(Boolean).length;
+    console.log(`published word count (::: marker blocks stripped): ${publishedWords}`);
+  }
+  const violations = [...checkText(text, opts), ...(platform ? checkLength(text, platform, opts) : [])];
   if (violations.length === 0) {
-    console.log(`CLEAN: ${file} passes all voice gates${platform ? ` + ${platform} length window` : ''}`);
+    console.log(`CLEAN: ${file} passes all voice gates${platform ? ` + ${platform} length window` : ''}${published ? ' (published body)' : ''}`);
     process.exit(0);
   }
   for (const v of violations) console.log(`VIOLATION [${v.gate}] ${v.message} (x${v.count})`);
