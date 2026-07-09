@@ -54,13 +54,14 @@ function readFrontmatter(text) {
   return fm;
 }
 
-// An adaptation is a .md file that is either named for a known platform, or carries a `source:` line.
-// The master itself and NOTES/HANDOFF/spec files are excluded.
-function isAdaptation(name, text) {
+// An adaptation is a .md file that is either named for a known platform, or carries a `source:` line in
+// its FRONTMATTER (parsed by readFrontmatter, not a loose whole-text regex that could match body prose;
+// CodeRabbit PR #11). fm is the already-parsed frontmatter for this file.
+function isAdaptation(name, fm) {
   if (!name.endsWith('.md')) return false;
   const stem = name.replace(/\.md$/, '').split('-')[0].toLowerCase(); // "linkedin-v2" -> "linkedin"
   if (PLATFORMS.has(stem)) return true;
-  return /^---\n[\s\S]*?\bsource:\s*\S/.test(text);
+  return Boolean(fm.source);
 }
 
 const { dir, master } = parseArgs(process.argv);
@@ -90,9 +91,9 @@ for (const name of files) {
   if (!st.isFile()) continue;
   let text;
   try { text = readFileSync(full, 'utf8'); } catch { continue; }
-  if (!isAdaptation(name, text)) continue;
-
   const fm = readFrontmatter(text);
+  if (!isAdaptation(name, fm)) continue;
+
   // Resolve which source this adaptation names (default to the given master).
   const srcName = fm.source || master;
   const srcPath = join(dirAbs, srcName);

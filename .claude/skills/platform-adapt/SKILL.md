@@ -13,7 +13,7 @@ Turn one canonical piece into platform-native versions. Adaptation means re-expr
 2. **Read the playbook's format section** and the audience register in `knowledge/audiences.md` for the platform's primary audience.
 3. **Adapt.** One `platform-adapter` subagent per platform when doing 3+ in parallel (each gets the master text + one playbook + ONE explicit output path); inline for 1-2 platforms. Every adaptation keeps: the core claim, the lived-experience anchor, and the concrete takeaway. Everything else (length, structure, hook style, link handling) obeys the playbook.
 4. **Stamp provenance.** Each adaptation file opens with frontmatter recording what it was built from, so staleness is later detectable:
-   ```
+   ```yaml
    ---
    source: <master filename, e.g. master.md or voiceos-final-v5.md>
    source_hash: sha256:<sha256 of the master file's current contents>

@@ -15,21 +15,12 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 
-// Strip ::: embed/image marker blocks (the MEDIA-EMBED-GUIDE convention: a block opens with a line
-// beginning `:::` and closes with a bare `:::`; both toggle-lines and everything between are removed).
-// This is the canonical definition of "published text" for a draft that carries editor markers, and
-// it is single-sourced HERE so the build tooling (scripts/lib/draft-parse.mjs) and the length gate
-// agree on what counts. Mirrors the historical `awk 'BEGIN{b=0}/^:::/{b=!b;next}b{next}{print}'`.
-export function stripEmbedBlocks(text) {
-  const kept = [];
-  let inBlock = false;
-  for (const line of text.split('\n')) {
-    if (/^:::/.test(line)) { inBlock = !inBlock; continue; }
-    if (inBlock) continue;
-    kept.push(line);
-  }
-  return kept.join('\n');
-}
+// The ::: embed/image marker convention (MEDIA-EMBED-GUIDE) is single-sourced in the shared draft parser
+// so the length gate and the publish tooling share exactly one implementation (CodeRabbit PR #11: avoid a
+// second copy of the ::: parsing that could drift). draft-parse.mjs is pure (no import side effects), so
+// importing it here is safe. Re-exported to keep `voice-gates.stripEmbedBlocks` a stable public entry.
+import { stripEmbedBlocks } from './lib/draft-parse.mjs';
+export { stripEmbedBlocks };
 
 // The banned-term pattern is constructed (not written literally) so this source file itself
 // stays clean under the blanket substring ban (Qodo PR #3 finding 2).

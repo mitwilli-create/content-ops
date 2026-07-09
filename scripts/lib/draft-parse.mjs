@@ -11,6 +11,25 @@
 //          renderMarkdown(md) -> HTML string   (## / **bold** / [links] / - bullets / > callouts / paragraphs)
 //          escapeHtml(s), youtubeId(url)
 
+// Canonical ::: fence test: a block opens with a line beginning `:::` and closes with a bare `:::`.
+// Single-sourced here and consumed by BOTH the build tooling (parseDraft below) and the length gate
+// (scripts/voice-gates.mjs re-exports stripEmbedBlocks), so the convention has exactly one implementation.
+export const EMBED_FENCE = /^:::/;
+
+// stripEmbedBlocks(text) -> text with every ::: embed/image instruction block removed (toggle-lines and
+// everything between). This is the canonical definition of "published text" for a marker-bearing draft.
+// Mirrors the historical `awk 'BEGIN{b=0}/^:::/{b=!b;next}b{next}{print}'`.
+export function stripEmbedBlocks(text) {
+  const kept = [];
+  let inBlock = false;
+  for (const line of text.split('\n')) {
+    if (EMBED_FENCE.test(line)) { inBlock = !inBlock; continue; }
+    if (inBlock) continue;
+    kept.push(line);
+  }
+  return kept.join('\n');
+}
+
 export function escapeHtml(s) {
   return String(s)
     .replace(/&/g, '&amp;')
@@ -123,11 +142,11 @@ export function parseDraft(text) {
   let i = start;
   while (i < rawLines.length) {
     const line = rawLines[i];
-    if (/^:::/.test(line)) {
+    if (EMBED_FENCE.test(line)) {
       flushMd();
       const media = parseMediaOpen(line);
       i++;
-      while (i < rawLines.length && !/^:::/.test(rawLines[i])) {
+      while (i < rawLines.length && !EMBED_FENCE.test(rawLines[i])) {
         const attr = rawLines[i].match(/^(WHY|ALT|CAPTION|ACTION):\s*(.*)$/i);
         if (attr) media[attr[1].toLowerCase()] = attr[2].trim();
         i++;
