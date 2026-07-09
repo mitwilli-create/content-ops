@@ -44,10 +44,12 @@ export function youtubeId(url) {
 }
 
 // Inline markdown: escape first, then **bold** and [text](url). URLs are attribute-escaped for quotes.
+// The URL capture allows balanced single-level parentheses so links like
+// en.wikipedia.org/wiki/Foo_(bar) are not truncated at the first ')' (CodeRabbit PR #11).
 function renderInline(text) {
   let out = escapeHtml(text);
   out = out.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-  out = out.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, t, u) => `<a href="${u.replace(/"/g, '&quot;')}">${t}</a>`);
+  out = out.replace(/\[([^\]]+)\]\(((?:[^()]|\([^()]*\))*)\)/g, (_, t, u) => `<a href="${u.replace(/"/g, '&quot;')}">${t}</a>`);
   return out;
 }
 
