@@ -49,10 +49,21 @@ FINDING (2026-07-05, RESOLVED 2026-07-06): the 5 content-agent skills declared i
 
 | Detector | Command | What it fails on | Kill switch |
 |---|---|---|---|
-| Voice/format gates | `node scripts/voice-gates.mjs <file> [--platform <p>]` | em dash, banned term, banned idioms, platform length window in the given artifact | none (core gate; bypassing is a per-invocation choice, not an env flag) |
+| Voice/format gates | `node scripts/voice-gates.mjs <file> [--platform <p>] [--published]` | em dash, banned term, banned idioms, platform length window in the given artifact. `--published` strips `:::` marker blocks first so the length gate reports the TRUE published word count (a raw count false-trips the ceiling on drafts with embed markers) | none (core gate; bypassing is a per-invocation choice, not an env flag) |
 | Length-window drift | `node scripts/voice-gates.mjs --check-windows` | playbook missing/unparseable/schema-invalid `length_window:` line; fallback table diverging from playbooks; fallback entry with no playbook file | `VOICE_GATES_DISABLE_WINDOW_CHECK=true` (short-circuits, exit 0, prints a disabled notice) |
+| Adaptation staleness | `node scripts/check-adaptation-staleness.mjs <draft-dir> --master <file>` | a platform adaptation whose `source_hash` no longer matches its master (STALE), or, absent a hash, a master edited after the adaptation (LIKELY-STALE), or a named source that is missing (ERROR) | none (per-invocation; run it in `/draft-post`, `/platform-adapt`, and `/publish` preconditions) |
 
 Canonical window source: the `length_window: <one-line JSON|null>` header in each `knowledge/platforms/*.md` (single writer: `/platform-playbook-refresh`). `scripts/voice-gates.mjs` loads them at import, platform set derived from the directory listing; the in-script table is a warn-loudly resilience fallback only. Run `--check-windows` after any playbook window edit.
+
+## Publish tooling (durable; productized from launch scratchpad 2026-07-09)
+
+The first Substack launch rebuilt these from an ephemeral scratchpad every session. They now live in `scripts/`, take the draft path as an ARGUMENT (no hardcoded paths / vN filenames), and write predictable per-draft outputs to `<draft-dir>/.render/` (gitignored with `drafts/`). Reconstructed as dependency-free Node `.mjs` to match `voice-gates.mjs` (the Python originals were never committed).
+
+- `scripts/build-paste-body.mjs <draft>` - rich-text body for the Substack editor; each `:::` media block becomes a numbered `⛳ N/TOTAL` marker line. TOTAL is AUTO-COUNTED from the draft (no hand-edited constant).
+- `scripts/build-mockup.mjs <draft>` - Substack-styled HTML preview with media in position (YouTube thumbs, inline images, callout, code template).
+- `scripts/load-clipboard.sh <draft> [--screenshot]` - renders first, then loads the rich-text clipboard LAST. Headless Chrome clobbers the clipboard, so the load must be the final step; this script enforces that order.
+- `scripts/lib/draft-parse.mjs` - shared parser (single-sources the `:::` convention shared with `voice-gates.mjs::stripEmbedBlocks`).
+- The end-to-end runbook is the `/publish` skill.
 
 ## Conventions
 
