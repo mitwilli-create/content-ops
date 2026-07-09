@@ -71,6 +71,7 @@ For high-stakes pieces: draft with Fable 5 → parallel critique from GPT-5 + Ge
 - `/draft-post` — take a ledger idea → master draft + platform adaptations
 - `/platform-adapt` — take existing content → adapt for N named platforms
 - `/timing-check` — live-verify posting windows before any schedule recommendation
+- `/engagement-optimize` — pre-publish per-platform engagement pass (timing, tags/flairs, hook shaping, link placement, format); calls timing-check + story-scout pulse + reads playbooks, never hardcodes mechanics. Forward twin of the retrospective `engagement-analyst` subagent
 - `/content-review` — pre-publish gate: voice, grounding, audience fit, HN-proofing
 
 ## Connectors
