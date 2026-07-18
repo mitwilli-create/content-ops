@@ -19,6 +19,10 @@ You are the orchestrator of Mitchell Williams' content system. Sole purpose: hel
 7. Recipient's relief first: every piece answers "what does the reader get in the first 10 seconds."
 8. No fabricated metrics or experiences, ever. Same grounding discipline as career-ops apply-packs.
 
+## Long-form drafting (anti-compression, hard rule)
+
+Drafting any long piece (Substack pillar, any `doc` over ~400 words, multi-section essay) through Voice OS goes through `python3 ~/Documents/voice-os/scripts/draft_long.py --file <brief> --out <final>` (section-by-section), NEVER a single whole-document `voice_os draft` pass. The single pass compresses hard and silently drops whole sections (observed: ~2,000 → ~1,090 words, deep-dive + lessons + visuals gone). `draft_long` voices each section, preserves `:::embed:::`/`:::image:::` markers, and runs a truncation guard (fails on output < 70% of input, any empty section, offline mode, an em dash, or a banned word). Report per-section fidelity + the guard result, then do a coherence pass on transitions. API keys auto-load via `~/.zshenv` (see memory `canonical-api-keys-env`).
+
 ## Research policy — when to use what (the master decision rule)
 
 | Tier | Trigger | Tool |
@@ -82,3 +86,12 @@ Wired now: Chrome MCP (posting/scraping any platform web UI), WebSearch/WebFetch
 ## Builder layer (SDLC) — see AGENTS.md
 
 Changes TO this agent system (new skills, connectors, memory schema, KB structure) go through the builder-skill layer governed by `AGENTS.md` § Sourcing policy: COMMUNITY-sourced skills quarantine in `.claude/skills-inbox/` for a supply-chain pre-scan before their promotion PR (rule 4); AUTHORED skills are born in `.claude/skills/` on a feature branch and the reviewed PR itself is their quarantine (rule 4b). Both paths require the Qodo PR review, a functional smoke test, and a ledger entry in `docs/skill-adoption-ledger.md`. The content skills listed above shipped through this gate (PRs #3 and #5). Council fan-out for build decisions: `scripts/run-council-content.sh` (explicit models list always).
+
+<!-- BEGIN STANDING-RULES (Mitchell global, installed 2026-07-18) -->
+## Standing rules (global)
+
+These apply to any Claude instance working in this repo, including off-machine (CI, collaborators, cloud agents):
+
+1. **Freshness re-anchor.** Before acting on the first input of a session, and again after any gap over ~3 hours, web-search to confirm the current Pacific date/time (PST/PDT-aware) and scan the task topic for anything that changed since your knowledge cutoff, before relying on training-data recall. Re-check any pending "today/tomorrow" commitment against the confirmed date.
+2. **Stack-search before building.** At the start of any new build / feature / reusable tool, first research what already exists (X, Reddit, Hacker News, Discord, dev forums, package registries) for highly-rated, peer-recommended solutions. Report BUILD-vs-ADOPT with sources; bias to ADOPT over BUILD unless there is a real, audience-worthy gap. Build for an audience, not just yourself.
+<!-- END STANDING-RULES -->
