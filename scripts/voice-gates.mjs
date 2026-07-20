@@ -292,7 +292,7 @@ const isMain = process.argv[1] && import.meta.url === pathToFileURL(process.argv
 if (isMain) {
   const args = process.argv.slice(2);
   const usage =
-    'usage: node scripts/voice-gates.mjs <file> [--platform <name>] [--published] | --check-windows | --check-banned';
+    'usage: node scripts/voice-gates.mjs <file> [--platform <name>] [--published] | --check-windows | --check-banned | --self-test';
   const published = args.includes('--published');
 
   // Drift check: the committed scripts/banned-phrases.json must match what
@@ -308,6 +308,79 @@ if (isMain) {
     const gen = new URL('./gen-banned.mjs', import.meta.url);
     const r = spawnSync(process.execPath, [fileURLToPath(gen), '--check'], { stdio: 'inherit' });
     process.exit(r.status === null ? 2 : r.status);
+  }
+
+  // Self-test: does the banned-phrase gate actually FIRE on bad input?
+  //
+  // --check-banned proves the artifact matches its generator. It cannot prove the
+  // gate WORKS, because a regenerated artifact always matches its generator. The
+  // pattern above is assembled at import time from a join() inside a lookbehind/
+  // lookahead boundary class; break that assembly and drift stays green, clean
+  // files stay clean, and nothing anywhere says otherwise. Ported from stack-ops
+  // (2026-07-20) after that repo shipped a banned-vocab rule that enforced nothing
+  // for weeks and was twice "verified" against a clean tree. A clean pass proves
+  // nothing about a matcher; only a known-bad input does.
+  //
+  // Probes are DERIVED from the loaded tokens, never hardcoded, so editing the
+  // Voice OS list cannot quietly turn this into a no-op. Failing to derive one is
+  // itself a failure, for the same reason.
+  //
+  // Exit 0 all assertions pass, 1 on any failure, 2 if the gate could not load.
+  // Bypass: none, same as the core gate (phrased that way deliberately, since
+  // this file must stay clean under its own banned-term gate). A self-test you
+  // can switch off is the false green it exists to catch.
+  if (args.includes('--self-test')) {
+    if (_banned.problem) {
+      console.error(`self-test: gate could not load: ${_banned.problem}`);
+      console.error('Run: node scripts/gen-banned.mjs');
+      process.exit(2);
+    }
+    // Tokens are regex source. Turn one back into the literal text it matches.
+    const literal = (tok) =>
+      tok
+        .replace(/\(s\|es\|ed\|ing\|ly\)\?$/, '') // English morphology group
+        .replace(/\['’\]/g, '’') // apostrophe class -> typographic form
+        .replace(/\\(.)/g, '$1'); // undo escapeRe
+
+    const wordTok = _banned.tokens.find((t) => /\(s\|es\|ed\|ing\|ly\)\?$/.test(t));
+    const quoteTok = _banned.tokens.find((t) => t.includes("['’]"));
+    const failures = [];
+
+    if (!wordTok || !quoteTok) {
+      failures.push(
+        `cannot derive probes from banned-phrases.json (word=${!!wordTok} quote=${!!quoteTok}); ` +
+          'the self-test would be a no-op, which is the bug it exists to catch'
+      );
+    } else {
+      const hits = (text) =>
+        checkText(text).filter((v) => v.gate === 'banned-phrase').length;
+
+      // a) a banned single word is caught
+      const w = literal(wordTok);
+      if (hits(`This ${w} approach.`) === 0)
+        failures.push(`banned word "${w}" was NOT flagged; the gate is enforcing nothing`);
+
+      // b) BOTH apostrophe forms are caught. The matcher does not normalize them,
+      //    and real drafts carry both, so one form passing is half a gate.
+      const q = literal(quoteTok);
+      if (hits(q) === 0) failures.push(`typographic-apostrophe phrase "${q}" was NOT flagged`);
+      const qAscii = q.replace(/’/g, "'");
+      if (hits(qAscii) === 0) failures.push(`ASCII-apostrophe phrase "${qAscii}" was NOT flagged`);
+
+      // c) clean text is NOT flagged. A join() or boundary-class break can make the
+      //    pattern match everything, which fails outward material for no reason and
+      //    trains everyone to bypass the gate. Over-matching is a gate failure too.
+      if (hits('We shipped the parser on Tuesday. It reads one file and exits.') > 0)
+        failures.push('clean control text WAS flagged; the pattern is over-matching');
+    }
+
+    if (failures.length) {
+      console.error('self-test FAILED:');
+      for (const f of failures) console.error(`  - ${f}`);
+      process.exit(1);
+    }
+    console.log(`self-test ok: ${_banned.tokens.length} tokens, 4 assertions passed`);
+    process.exit(0);
   }
 
   // Drift check (regression detector): every playbook file must declare a parseable,
