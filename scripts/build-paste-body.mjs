@@ -51,7 +51,7 @@ for (const b of blocks) {
   const label = TYPE_LABEL[m.type] || 'MEDIA';
   const target = m.type === 'image' ? (m.target || m.rendered || '(image)') : (m.target || '(url)');
   const risky = m.risky ? ' [EMBED-RISKY: screenshot fallback]' : '';
-  const why = m.why ? ` — WHY: ${m.why}` : '';
+  const why = m.why ? ` (WHY: ${m.why})` : '';
   const marker = `⛳ ${n}/${mediaCount} ${label}: ${target}${risky}${why}`;
   parts.push(`<p data-media-marker="${n}"><strong>${escapeHtml(marker)}</strong></p>`);
   manifest.push({ n, label, target, risky: m.risky, why: m.why || '' });

@@ -1,5 +1,5 @@
 #!/bin/bash
-# promote-skill.sh — promotion gate v2 (Qodo PR-review flow).
+# promote-skill.sh: promotion gate v2 (Qodo PR-review flow).
 # The original gate used the Qodo CLI, which Qodo discontinued (backend refuses all calls
 # as of 2026-07-05). The working Qodo product is automatic PR review on a connected Git
 # provider, so promotion is now a PR: skill files enter .claude/skills/ on a branch, Qodo
@@ -26,7 +26,7 @@ for name in "$@"; do
 done
 
 # NOTE: the suffix must be computed in a plain if, not inline as
-# BRANCH="...$( [[ $# -gt 1 ]] && ... )" — under set -e a failing command
+# BRANCH="...$( [[ $# -gt 1 ]] && ... )". Under set -e, a failing command
 # substitution in an assignment aborts the script, which made every
 # single-skill invocation exit 1 before doing anything.
 SUFFIX=""
@@ -45,7 +45,7 @@ for name in "$@"; do
     mkdir -p ".claude/skills/$name"
     rsync -a --exclude='.git' "$SRC/" ".claude/skills/$name/"
   else
-    echo "SKIP $name: no SKILL.md at repo root — extract specific skill dirs manually"; continue
+    echo "SKIP $name: no SKILL.md at repo root. Extract specific skill dirs manually"; continue
   fi
   git add ".claude/skills/$name"
   PROMOTED=$(( PROMOTED + 1 ))

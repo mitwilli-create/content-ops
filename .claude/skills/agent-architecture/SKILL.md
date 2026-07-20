@@ -1,6 +1,6 @@
 ---
 name: agent-architecture
-description: Design the architecture for a Claude Code agent system before building it — subagent topology, skill decomposition, memory schema, knowledge-base layout, and connector (MCP) inventory. Use this whenever adding a new capability to the content-ops agent, restructuring skills or memory, wiring a new platform connector, or any time a change touches more than one of (skills, agents, memory, knowledge, connectors). Also trigger when the user says "design", "architect", "how should this be structured", or proposes a feature with no spec yet.
+description: Design the architecture for a Claude Code agent system before building it: subagent topology, skill decomposition, memory schema, knowledge-base layout, and connector (MCP) inventory. Use this whenever adding a new capability to the content-ops agent, restructuring skills or memory, wiring a new platform connector, or any time a change touches more than one of (skills, agents, memory, knowledge, connectors). Also trigger when the user says "design", "architect", "how should this be structured", or proposes a feature with no spec yet.
 ---
 
 # Agent Architecture
@@ -11,18 +11,18 @@ Produce a design doc BEFORE code. Agent systems rot from undesigned growth: skil
 
 Write `docs/specs/<slug>-design.md` with exactly these sections:
 
-1. **Problem + audience** — what the capability does and for whom (one paragraph).
-2. **Topology decision** — which of the five surfaces this lives in, with reasoning:
+1. **Problem + audience:** what the capability does and for whom (one paragraph).
+2. **Topology decision:** which of the five surfaces this lives in, with reasoning:
    - `SKILL.md` (repeatable workflow the orchestrator follows)
    - subagent in `.claude/agents/` (isolated context, parallel, or specialized system prompt needed)
    - `knowledge/` doc (facts the agent consults)
    - `memory/` file (learned state that accumulates across sessions)
    - MCP connector (external system access)
    A feature usually needs 1-2 of these, not all five. Justify each one you add; naming what you are NOT building is as valuable as what you are.
-3. **Data flow** — inputs → transformations → outputs, naming actual file paths.
-4. **Reuse audit** — which existing skills/agents/libs already cover part of this (read `.claude/skills/` and AGENTS.md first; duplicating an existing surface is a defect).
-5. **Failure modes** — what breaks first, and the observable signal when it does.
-6. **Acceptance test** — the concrete check that proves the built thing works.
+3. **Data flow:** inputs → transformations → outputs, naming actual file paths.
+4. **Reuse audit:** which existing skills/agents/libs already cover part of this (read `.claude/skills/` and AGENTS.md first; duplicating an existing surface is a defect).
+5. **Failure modes:** what breaks first, and the observable signal when it does.
+6. **Acceptance test:** the concrete check that proves the built thing works.
 
 ## Design rules (learned the expensive way in career-ops)
 

@@ -1,6 +1,6 @@
 ---
 name: mcp-debug
-description: Test and debug MCP connectors in isolation — tool signatures, auth flows, resource listings, error responses — before wiring them into an agent. Use whenever an MCP server misbehaves, a new connector is being added, a tool call returns confusing errors, or the user says "the connector is broken", "test this MCP", "why isn't <server> working". Debugging MCP through the full agent loop wastes tokens and hides the actual failure — isolate first.
+description: Test and debug MCP connectors in isolation (tool signatures, auth flows, resource listings, error responses) before wiring them into an agent. Use whenever an MCP server misbehaves, a new connector is being added, a tool call returns confusing errors, or the user says "the connector is broken", "test this MCP", "why isn't <server> working". Debugging MCP through the full agent loop wastes tokens and hides the actual failure. Isolate first.
 ---
 
 # MCP Debug
@@ -17,7 +17,7 @@ An MCP failure inside an agent session has three suspects: the server, the harne
    npx @modelcontextprotocol/inspector --cli <server> --method tools/call --tool-name <name> --tool-arg key=value
    ```
    No `--cli` flag opens the browser UI (better for OAuth flows and eyeballing schemas).
-2. **Read the actual schema** — most "agent can't use the tool" bugs are schema mismatches: required params the description doesn't mention, enums the agent guesses wrong, string-typed numbers. Compare `tools/list` output against what the agent sent.
+2. **Read the actual schema:** most "agent can't use the tool" bugs are schema mismatches: required params the description doesn't mention, enums the agent guesses wrong, string-typed numbers. Compare `tools/list` output against what the agent sent.
 3. **Auth failures**: reproduce OUTSIDE the agent. If Inspector can't auth either, it's the server/credentials; if Inspector works, it's harness config (check the MCP registration and env vars).
 4. **Only then** re-test inside a minimal agent session with the single tool loaded.
 
