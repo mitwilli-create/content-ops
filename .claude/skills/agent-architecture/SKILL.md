@@ -30,7 +30,7 @@ Write `docs/specs/<slug>-design.md` with exactly these sections:
 - Any agent that edits files in parallel needs worktree isolation; read-only agents can share the tree.
 - Every background process needs a timeout and a heartbeat; never poll a file for completion.
 - State files need a schema and an atomic write (tmp + rename); state written without a disk artifact to verify against WILL drift.
-- Every new env var / kill switch gets documented in AGENTS.md the same commit it is born.
+- Every new env var / bypass switch gets documented in AGENTS.md the same commit it is born.
 
 ## Method reference
 

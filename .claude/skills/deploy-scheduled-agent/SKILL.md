@@ -1,6 +1,6 @@
 ---
 name: deploy-scheduled-agent
-description: Deploy a scheduled or background agent job on this macOS Tahoe machine: launchd plists, the Tahoe KeepAlive nohup-wrapper workaround, log placement, kill switches, and post-deploy verification. Use whenever scheduling anything recurring (daily digests, scans, refresh jobs), converting a manual script to a scheduled one, or when a scheduled job is flapping/silent. Council research (2026-07-05) confirmed nothing credible exists publicly for macOS launchd agent deployment. This skill encodes the hard-won career-ops runbook.
+description: Deploy a scheduled or background agent job on this macOS Tahoe machine: launchd plists, the Tahoe KeepAlive nohup-wrapper workaround, log placement, bypass switches, and post-deploy verification. Use whenever scheduling anything recurring (daily digests, scans, refresh jobs), converting a manual script to a scheduled one, or when a scheduled job is flapping/silent. Council research (2026-07-05) confirmed nothing credible exists publicly for macOS launchd agent deployment. This skill encodes the hard-won career-ops runbook.
 ---
 
 # Deploy Scheduled Agent (macOS Tahoe)
@@ -17,10 +17,10 @@ Scheduling on this machine has three landmines that cost real debugging days in 
 
 1. Write the wrapper in `~/.local/content-ops-wrappers/<job>.sh` (mkdir if needed), exec'ing the real script with its env. `chmod +x`.
 2. Write the plist to `~/Library/LaunchAgents/com.mitchell.content-ops.<job>.plist`: label matching filename, `ProgramArguments` = `[/bin/bash, <wrapper-path>]`, `StartCalendarInterval` (or `StartInterval`), `StandardOutPath`/`StandardErrorPath` under `~/Library/Logs/content-ops/`.
-3. Add a kill switch: the script checks an env var (`<JOB>_ENABLED`, default on) and exits 0 when disabled. Document this in AGENTS.md the same commit.
+3. Add a bypass switch: the script checks an env var (`<JOB>_ENABLED`, default on) and exits 0 when disabled. Document this in AGENTS.md the same commit.
 4. Load: `launchctl bootstrap gui/$(id -u) <plist-path>` then verify `launchctl print gui/$(id -u)/<label>` shows `state = waiting` (not repeated respawns).
 5. **Smoke-fire it now, don't wait for the schedule**: `launchctl kickstart -k gui/$(id -u)/<label>`, then tail the log and check the exit status in `launchctl print` output. "It loaded" is not "it works".
-6. Record in AGENTS.md: label, cadence, kill switch, log path, what it writes.
+6. Record in AGENTS.md: label, cadence, bypass switch, log path, what it writes.
 
 ## Ship LOADED-BUT-DISABLED when the job spends money or mutates data
 

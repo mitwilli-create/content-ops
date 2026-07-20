@@ -21,7 +21,7 @@ Wraps [promptfoo](https://github.com/promptfoo/promptfoo) (★22.9k, verified 20
 
 Every content-prompt eval includes these deterministic asserts (they encode the house voice gates):
 - `not-contains: "\u2014"` (rejects the em dash character)
-- no standalone banned word "kill" (regex `\bkill`)
+- no standalone use of the banned k-word for terminate (the gate owns the pattern; see `scripts/voice-gates.mjs`)
 - platform length window (JS assert reading `knowledge/platforms/<platform>.md` limits)
 
 ## Cost control

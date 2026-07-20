@@ -15,7 +15,7 @@ Agents degrade silently: a model version shifts, a prompt edit ripples, a KB doc
 
 ## Rules
 
-- Every detector needs a kill switch env var + AGENTS.md row.
+- Every detector needs a bypass switch env var + AGENTS.md row.
 - Alert = a written artifact (report file / ledger row) a human will actually see, not a log line. Terminal-only alerts on scheduled jobs alert nobody.
 - When a check fires, the report must include the failing input + the diff vs baseline: "check failed" without reproduction material just schedules a debugging session.
 - Budget-cap any detector that calls LLMs; a runaway checker is itself a regression.
