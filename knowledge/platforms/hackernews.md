@@ -7,7 +7,7 @@ length_window: null
 **Role in the system:** Highest-leverage, highest-risk surface. One front-page hit = thousands of dev-audience Substack subs. One marketing-smelling post = credibility damage. Audience 1 only.
 
 ## What works
-- Show HN with a real artifact (repo, demo, writeup with code) — Mitchell's career-ops architecture posts qualify.
+- Show HN with a real artifact (repo, demo, writeup with code): Mitchell's career-ops architecture posts qualify.
 - Essays with technical depth + honest tradeoffs. HN loves "I was wrong about X" and cost/failure transparency.
 - Titles: plain, specific, zero clickbait. "What my agent does while I wait: measuring 40 hours of babysitting" not "You Won't Believe What Engineers Do."
 - The comment section IS the content: first-hour thoughtful author replies drive ranking as much as votes.
@@ -17,7 +17,7 @@ length_window: null
 - Vote solicitation (bannable), resubmission games, submitting your own stuff more than ~20% of your activity.
 - Claims without receipts: HN commenters WILL reproduce your numbers.
 
-## Timing (BASELINE Jan 2026 — /timing-check)
+## Timing (BASELINE Jan 2026, /timing-check)
 - Weekday mornings 6-9am PT historically best (US workday ramp, front page less locked).
 - Second-chance pool exists: a good post that missed can be emailed to mods; don't resubmit-spam.
 

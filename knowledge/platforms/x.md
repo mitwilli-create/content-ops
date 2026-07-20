@@ -13,7 +13,7 @@ length_window: {"maxChars": 4000}
 - Dwell time is now the dominant ranking signal; write for hold, not just the scroll-stop (as of 2026-07, SEO-blog convergence + pulse).
 - Quote-post with added value > reply for visibility (~25x a like per third-party estimates); reply-guy energy caps accounts. Reply QUALITY became a direct ranking signal ~2026-03, and Premium+ users can downvote spammy/AI-slop replies, so low-effort reply tactics now carry suppression risk.
 
-## Timing (verified 2026-07-06 — /timing-check + Grok pulse before scheduling)
+## Timing (verified 2026-07-06, /timing-check + Grok pulse before scheduling)
 - Weekday mornings PT + a second ~5-7pm PT window: reconfirmed as baseline (third-party convergence, as of 2026-07).
 - First 15-60 min engagement velocity matters more than time-of-day: be present to reply right after posting.
 - News-cycle surfing reconfirmed: model releases, outages, and AI drama create 6-24h windows with 10-50x reach. Grok-check "what is AI Twitter talking about right now" before any take.
@@ -27,4 +27,4 @@ length_window: {"maxChars": 4000}
 ## Mitchell-specific
 - Native stories: agent babysitting (#1), model switching (#2), harness (#14), context windows truth (#17), memory files (#10/#16).
 - The meta-move: THIS content system building itself is a build-in-public thread series.
-- Grok live-X search is wired via council (xai:grok-4-x-search) — saturation-check every take: if 3+ big accounts said it this week, find the un-said angle or skip.
+- Grok live-X search is wired via council (xai:grok-4-x-search). Saturation-check every take: if 3+ big accounts said it this week, find the un-said angle or skip.

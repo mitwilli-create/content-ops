@@ -1,9 +1,9 @@
-# LLM Routing — expanded rationale
+# LLM Routing: expanded rationale
 
 last_verified: 2026-01-31
 notes: baseline from model knowledge at authoring (2026-07-05); model IDs + pricing drift, verify before relying
 
-Invocation: `node ~/Documents/career-ops/scripts/run-council.mjs` with explicit `--models` (empty flag silently falls back to Sonnet-only — always pass the list). API keys live in career-ops `.env`. Typical full-council run: ~$0.20-0.45.
+Invocation: `node ~/Documents/career-ops/scripts/run-council.mjs` with explicit `--models` (an empty flag silently falls back to Sonnet-only, so always pass the list). API keys live in career-ops `.env`. Typical full-council run: ~$0.20-0.45.
 
 ## Per-job routing
 
@@ -12,7 +12,7 @@ Invocation: `node ~/Documents/career-ops/scripts/run-council.mjs` with explicit 
 | Drafting, voice, orchestration | Fable 5 (session) | Opus 4.7 | Never delegate final voice pass |
 | X pulse / trend saturation | xai:grok-4-x-search | perplexity:sonar-reasoning-pro | Grok is the ONLY live-X source; use before timing any X post |
 | Deep cited research (pillar essays) | perplexity:sonar-deep-research | gemini + websearch | 20-40 min async; kick off early |
-| Whole-transcript / video-script ingest | google:gemini-3.1-pro | — | 1M+ context; feed raw footage transcripts |
+| Whole-transcript / video-script ingest | google:gemini-3.1-pro | none | 1M+ context; feed raw footage transcripts |
 | Contrarian redraft / headline A-B | openai:gpt-5 | xai:grok-4.3 | Different prior = genuine alternative, not paraphrase |
 | Bulk tagging / thread summarization | claude-haiku-4-5 | gemini-flash | Pennies |
 | Pre-publish adversarial review | council fan-out (3-7 models) | Opus solo | Each model gets ONE audience lens |

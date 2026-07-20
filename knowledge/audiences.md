@@ -16,7 +16,7 @@ Every piece targets ONE primary audience. Cross-post adaptations may shift the f
 **Who:** Technical-adjacent makers: indie hackers, PMs who ship, designers using Cursor/Claude Code, ops people automating. Live on X, LinkedIn, YouTube, Substack, Discord communities.
 **What earns their attention:** "Here's exactly how I did it" with steps they can copy. Cost transparency ($X to build Y). Before/after workflow comparisons.
 **What dies:** Pure theory, gatekeeping jargon without a bridge.
-**Mitchell's edge:** He is the archetype — non-traditional path into building. "Skills, MCPs, tools oh my," "memory files," "making AI give you what you want" are for them.
+**Mitchell's edge:** He is the archetype: non-traditional path into building. "Skills, MCPs, tools oh my," "memory files," "making AI give you what you want" are for them.
 **Register:** Generous senior peer who remembers being confused.
 
 ## 3. Newly AI-Enabled

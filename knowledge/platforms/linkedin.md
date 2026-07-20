@@ -13,11 +13,11 @@ length_window: {"minWords": 80, "maxWords": 380}
 ## Format that works
 - 150-300 words. Hook line MUST work truncated (~140-210 chars before "...see more"; reconfirmed 2026-06). Note: a 372K-post analysis found peak engagement at ~230-450 words, so the 380-word ceiling is worth an A/B against his own performance log before widening.
 - Structure: one-line hook → line break → 3-6 short paragraphs (1-2 sentences each) → concrete takeaway → soft question.
-- Native > links: external links are penalized (third-party estimates vary 19-60%, no official number, as of 2026-03). The link-in-first-comment workaround is now reportedly detected and suppressed too — prefer full-value native excerpt with "full essay on my Substack" as plain text (SEO-blog reported, as of 2026-07).
+- Native > links: external links are penalized (third-party estimates vary 19-60%, no official number, as of 2026-03). The link-in-first-comment workaround is now reportedly detected and suppressed too. Prefer full-value native excerpt with "full essay on my Substack" as plain text (SEO-blog reported, as of 2026-07).
 - Document posts (PDF carousels) still the top format: ~6.1-6.6% engagement benchmark, optimal 7-10 slides (creator-reported data, as of 2026-06).
 - Native video: 60s-3min performs best (dwell time rewarded); burned-in captions are mandatory, majority watch muted (creator-reported, as of 2026-06).
 
-## Timing (verified 2026-07-06 — /timing-check before scheduling)
+## Timing (verified 2026-07-06, /timing-check before scheduling)
 - Tue-Thu 10am-noon is the current strongest baseline window, with a NEW 3-8pm post-work window rivaling mornings ("Wednesday 4pm" tops Buffer's 4.8M-post dataset); video peaks 12-2pm and 5-7pm (aggregated third-party data, as of 2026-06). Mitchell should test an afternoon PT slot, not just ~8am PT.
 - First 30-60 min of engagement decide distribution (narrower than the old 60-90 min claim; only ~5% of posts that underperform hour 1 recover). Post when he can reply substantively to every comment immediately.
 - 3-5 posts/week with a minimum 18-24h gap between posts; two posts within ~4h cannibalize each other (creator-reported data, as of 2026-06).
