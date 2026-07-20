@@ -13,7 +13,8 @@
 // Module: import { GATES, LENGTH_WINDOWS, checkText, checkLength, normalizePlatform, stripEmbedBlocks } from './voice-gates.mjs'
 
 import { readFileSync, readdirSync } from 'node:fs';
-import { pathToFileURL } from 'node:url';
+import { spawnSync } from 'node:child_process';
+import { pathToFileURL, fileURLToPath } from 'node:url';
 
 // The ::: embed/image marker convention (MEDIA-EMBED-GUIDE) is single-sourced in the shared draft parser
 // so the length gate and the publish tooling share exactly one implementation (CodeRabbit PR #11: avoid a
@@ -48,6 +49,58 @@ export const GATES = [
     message: 'banned idiom found: use honest / transparent / upfront',
   },
 ];
+
+// ---- banned phrases (generated from the Voice OS list) ----------------------
+// CANONICAL SOURCE: voice-os/data/banned_list.txt. Committed here as
+// scripts/banned-phrases.json by scripts/gen-banned.mjs, for the same resilience
+// reason as FALLBACK_WINDOWS: voice-os is a separate repo and may be absent.
+// Promoted to a HARD FAIL (not a warning tier) on 2026-07-20 after measuring the
+// full list against drafts/: 30 hits across 49 files, and every hit landing in
+// outward material was a true positive. A warning would exit 0 and enforce
+// nothing, which is a false green.
+const BANNED_ARTIFACT = new URL('./banned-phrases.json', import.meta.url);
+
+export function loadBannedTokens() {
+  let raw;
+  try {
+    raw = readFileSync(BANNED_ARTIFACT, 'utf8');
+  } catch (e) {
+    return { tokens: null, problem: `banned-phrases.json unreadable (${e.message})` };
+  }
+  let parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (e) {
+    return { tokens: null, problem: `banned-phrases.json is not valid JSON (${e.message})` };
+  }
+  if (!Array.isArray(parsed.tokens) || parsed.tokens.length === 0) {
+    return { tokens: null, problem: 'banned-phrases.json has no tokens array' };
+  }
+  if (!parsed.tokens.every((t) => typeof t === 'string' && t.length > 0)) {
+    return { tokens: null, problem: 'banned-phrases.json tokens must all be non-empty strings' };
+  }
+  return { tokens: parsed.tokens, problem: null };
+}
+
+const _banned = loadBannedTokens();
+if (_banned.tokens) {
+  // Hyphen is in the boundary class so a hyphenated banned phrase is not matched
+  // as a fragment of a longer hyphenated compound. Note this comment deliberately
+  // names no banned phrase: the file must stay clean under its own gates, same
+  // reason BANNED_TERM above is built with join() instead of written out.
+  const pattern = new RegExp(`(?<![\\w-])(?:${_banned.tokens.join('|')})(?![\\w-])`, 'gi');
+  GATES.push({
+    id: 'banned-phrase',
+    why: 'Banned vocabulary from the Voice OS list (voice-os/data/banned_list.txt), the single source of truth. Cut it or replace with a concrete fact or trade-off.',
+    pattern,
+    message: 'banned phrase found',
+    // Names the actual phrases, so the fix is obvious without re-grepping.
+    describe: (matches) => {
+      const distinct = [...new Set(matches.map((m) => m.toLowerCase()))];
+      return `banned phrase found: ${distinct.join(', ')}`;
+    },
+  });
+}
 
 // House per-platform length windows for DRAFT bodies (word counts unless noted).
 // CANONICAL SOURCE: the `length_window: <one-line JSON|null>` header in each
@@ -179,10 +232,23 @@ export function normalizePlatform(input) {
 export function checkText(text, opts = {}) {
   const target = opts.stripMarkers ? stripEmbedBlocks(text) : text;
   const violations = [];
+  // Fail CLOSED: if the generated banned list could not load, the gate did not run,
+  // and a silent pass here would be a false green on every artifact checked.
+  if (_banned.problem) {
+    violations.push({
+      gate: 'banned-phrase',
+      count: 1,
+      message: `banned-phrase gate could not run: ${_banned.problem}. Run: node scripts/gen-banned.mjs`,
+    });
+  }
   for (const gate of GATES) {
     const matches = target.match(gate.pattern);
     if (matches) {
-      violations.push({ gate: gate.id, count: matches.length, message: gate.message });
+      violations.push({
+        gate: gate.id,
+        count: matches.length,
+        message: gate.describe ? gate.describe(matches) : gate.message,
+      });
     }
   }
   return violations;
@@ -225,8 +291,24 @@ export function promptfooAssert(output, platform = null) {
 const isMain = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
 if (isMain) {
   const args = process.argv.slice(2);
-  const usage = 'usage: node scripts/voice-gates.mjs <file> [--platform <name>] [--published] | --check-windows';
+  const usage =
+    'usage: node scripts/voice-gates.mjs <file> [--platform <name>] [--published] | --check-windows | --check-banned';
   const published = args.includes('--published');
+
+  // Drift check: the committed scripts/banned-phrases.json must match what
+  // scripts/gen-banned.mjs produces from voice-os/data/banned_list.txt right now.
+  // Exit 0 clean, 1 on drift, 2 if the source list is unreachable (which is a
+  // real failure, not a pass: an unverifiable gate is not a verified one).
+  // Kill switch: VOICE_GATES_DISABLE_BANNED_CHECK=true
+  if (args.includes('--check-banned')) {
+    if (process.env.VOICE_GATES_DISABLE_BANNED_CHECK === 'true') {
+      console.log('banned drift check DISABLED via VOICE_GATES_DISABLE_BANNED_CHECK=true (no checks ran)');
+      process.exit(0);
+    }
+    const gen = new URL('./gen-banned.mjs', import.meta.url);
+    const r = spawnSync(process.execPath, [fileURLToPath(gen), '--check'], { stdio: 'inherit' });
+    process.exit(r.status === null ? 2 : r.status);
+  }
 
   // Drift check (regression detector): every playbook file must declare a parseable,
   // schema-valid length_window line; the resilience fallback table must match the playbooks

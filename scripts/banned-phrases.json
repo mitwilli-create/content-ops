@@ -1,0 +1,39 @@
+{
+  "_comment": [
+    "GENERATED FILE, DO NOT EDIT BY HAND.",
+    "Source: voice-os/data/banned_list.txt (the single source of truth).",
+    "Regenerate: node scripts/gen-banned.mjs",
+    "Verify:     node scripts/voice-gates.mjs --check-banned"
+  ],
+  "tokens": [
+    "i hope this email finds you well",
+    "i wanted to reach out",
+    "just checking in",
+    "touch base",
+    "circle back",
+    "leverage(s|es|ed|ing|ly)?",
+    "synergy(s|es|ed|ing|ly)?",
+    "deep dive",
+    "at your earliest convenience",
+    "please don['’]t hesitate to reach out",
+    "moving forward",
+    "per my last email",
+    "keep the lines of communication open",
+    "robust(s|es|ed|ing|ly)?",
+    "seamless(s|es|ed|ing|ly)?",
+    "cutting-edge(s|es|ed|ing|ly)?",
+    "game-changing(s|es|ed|ing|ly)?",
+    "unlock(s|es|ed|ing|ly)?",
+    "delve(s|es|ed|ing|ly)?",
+    "tapestry(s|es|ed|ing|ly)?",
+    "testament to",
+    "best-in-class(s|es|ed|ing|ly)?",
+    "revolutionize(s|es|ed|ing|ly)?",
+    "supercharge(s|es|ed|ing|ly)?",
+    "in today['’]s landscape",
+    "synergies(s|es|ed|ing|ly)?",
+    "game changer",
+    "game-changer(s|es|ed|ing|ly)?",
+    "game changing"
+  ]
+}
