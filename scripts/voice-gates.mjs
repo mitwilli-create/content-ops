@@ -102,6 +102,59 @@ if (_banned.tokens) {
   });
 }
 
+// ---- repo-wide sweep exclusions (--sweep only) ------------------------------
+// These files are skipped by the REPO SWEEP and by nothing else. Every artifact under
+// drafts/ still gets the full gate on every per-file invocation and in /publish
+// preconditions; this list changes no publishing behavior.
+//
+// Approved by Mitchell 2026-07-20 against a measured census of 55 dirty tracked files.
+// Three reasons, and no fourth is admissible. "This file is inconvenient to clean" is
+// not a reason; that file goes in the cleanup batch.
+//
+//   SELF      the file IS the matcher or IS the token list. Editing it to satisfy the
+//             gate DISABLES the gate. Precedent: voice-os scrub_em_dashes once rewrote
+//             the EmDash.yml rule's own token and silently switched the rule off, and
+//             stack-ops carries the same exemption for that file in .vale.ini.
+//   VENDORED  upstream source under someone else's copyright (superpowers, MIT, Jesse
+//             Vincent, imported wholesale in 1ac5ca9). Rewriting the prose makes every
+//             future upstream diff a conflict. Scoped to the 14 imported directories BY
+//             NAME, never to .claude/skills/ as a whole: seven SKILL.md files in that
+//             tree are Mitchell's own (3d5f41d) and stay in scope.
+//   GENERATED machine output kept as an audit record of what those models actually said.
+//             Editing the prose edits the record.
+const SWEEP_EXCLUSIONS = [
+  { path: 'scripts/voice-gates.mjs', reason: 'SELF: defines every gate pattern in this list' },
+  { path: 'scripts/banned-phrases.json', reason: 'SELF: is the banned-token list' },
+  ...[
+    'brainstorming',
+    'dispatching-parallel-agents',
+    'executing-plans',
+    'finishing-a-development-branch',
+    'receiving-code-review',
+    'requesting-code-review',
+    'subagent-driven-development',
+    'systematic-debugging',
+    'test-driven-development',
+    'using-git-worktrees',
+    'using-superpowers',
+    'verification-before-completion',
+    'writing-plans',
+    'writing-skills',
+  ].map((d) => ({ path: `.claude/skills/${d}/`, reason: 'VENDORED: superpowers upstream (MIT, 1ac5ca9)' })),
+  { path: '.claude/skills/SUPERPOWERS-ATTRIBUTION.md', reason: 'VENDORED: upstream attribution' },
+  { path: '.claude/skills/SUPERPOWERS-LICENSE', reason: 'VENDORED: upstream license text' },
+  { path: 'docs/skill-sourcing-report.md', reason: 'GENERATED: council transcript, kept as record' },
+  { path: 'docs/skill-sourcing-adjudicated.md', reason: 'GENERATED: dealbreaker output, kept as record' },
+];
+
+// A trailing slash means "this directory and everything under it".
+export function isSweepExcluded(file) {
+  for (const e of SWEEP_EXCLUSIONS) {
+    if (e.path.endsWith('/') ? file.startsWith(e.path) : file === e.path) return e;
+  }
+  return null;
+}
+
 // House per-platform length windows for DRAFT bodies (word counts unless noted).
 // CANONICAL SOURCE: the `length_window: <one-line JSON|null>` header in each
 // knowledge/platforms/<platform>.md (single writer: /platform-playbook-refresh, which
@@ -292,14 +345,14 @@ const isMain = process.argv[1] && import.meta.url === pathToFileURL(process.argv
 if (isMain) {
   const args = process.argv.slice(2);
   const usage =
-    'usage: node scripts/voice-gates.mjs <file> [--platform <name>] [--published] | --check-windows | --check-banned | --self-test';
+    'usage: node scripts/voice-gates.mjs <file> [--platform <name>] [--published] | --sweep | --check-windows | --check-banned | --self-test';
   const published = args.includes('--published');
 
   // Drift check: the committed scripts/banned-phrases.json must match what
   // scripts/gen-banned.mjs produces from voice-os/data/banned_list.txt right now.
   // Exit 0 clean, 1 on drift, 2 if the source list is unreachable (which is a
   // real failure, not a pass: an unverifiable gate is not a verified one).
-  // Kill switch: VOICE_GATES_DISABLE_BANNED_CHECK=true
+  // Bypass switch: VOICE_GATES_DISABLE_BANNED_CHECK=true
   if (args.includes('--check-banned')) {
     if (process.env.VOICE_GATES_DISABLE_BANNED_CHECK === 'true') {
       console.log('banned drift check DISABLED via VOICE_GATES_DISABLE_BANNED_CHECK=true (no checks ran)');
@@ -310,7 +363,7 @@ if (isMain) {
     process.exit(r.status === null ? 2 : r.status);
   }
 
-  // Self-test: does the banned-phrase gate actually FIRE on bad input?
+  // Self-test: do the gates actually FIRE on bad input?
   //
   // --check-banned proves the artifact matches its generator. It cannot prove the
   // gate WORKS, because a regenerated artifact always matches its generator. The
@@ -324,6 +377,14 @@ if (isMain) {
   // Probes are DERIVED from the loaded tokens, never hardcoded, so editing the
   // Voice OS list cannot quietly turn this into a no-op. Failing to derive one is
   // itself a failure, for the same reason.
+  //
+  // The three static gates (em-dash, banned-term, straight-idiom) are probed with
+  // INDEPENDENTLY CONSTRUCTED bad input: a codepoint literal, a join(), a
+  // concatenation. Never by reading GATES[n].pattern. A probe built from the thing
+  // it is testing certifies itself and passes no matter how the pattern is broken,
+  // which is precisely the stack-ops bug this whole exercise came out of (its step 4
+  // restated step 2's grep instead of calling it). Everything routes through
+  // checkText, so the probe exercises the same code path the real check uses.
   //
   // Exit 0 all assertions pass, 1 on any failure, 2 if the gate could not load.
   // Bypass: none, same as the core gate (phrased that way deliberately, since
@@ -345,49 +406,168 @@ if (isMain) {
     const wordTok = _banned.tokens.find((t) => /\(s\|es\|ed\|ing\|ly\)\?$/.test(t));
     const quoteTok = _banned.tokens.find((t) => t.includes("['’]"));
     const failures = [];
+    let assertions = 0;
 
+    // Count hits for ONE gate id, through the same checkText the real check calls.
+    const hitsOn = (gateId, text) =>
+      checkText(text).filter((v) => v.gate === gateId).length;
+    const assert = (cond, msg) => {
+      assertions += 1;
+      if (!cond) failures.push(msg);
+    };
+
+    // ---- static gates. Bad input constructed here, never read from GATES. ----
+    const EM = String.fromCharCode(0x2014); // em dash
+    const EN = String.fromCharCode(0x2013); // en dash, explicitly ALLOWED in date ranges
+    const KWORD = ['k', 'i', 'l', 'l'].join(''); // restated, not the module constant
+    const STRAIGHT = 'straight' + ' ' + 'up';
+
+    assert(
+      hitsOn('em-dash', `A sentence ${EM} broken by a dash.`) > 0,
+      `em-dash gate did NOT flag U+2014; it is enforcing nothing`
+    );
+    // The en dash is allowed (date ranges). An em-dash pattern widened to any dash
+    // would fail every range in the knowledge base and train everyone to bypass.
+    assert(
+      hitsOn('em-dash', `The 2024${EN}2025 window.`) === 0,
+      `em-dash gate flagged an en dash (U+2013); date ranges are allowed and it is over-matching`
+    );
+    assert(
+      hitsOn('banned-term', `We should ${KWORD} the process.`) > 0,
+      `banned-term gate did NOT flag the k-word; it is enforcing nothing`
+    );
+    // Both apostrophe forms, same reason as the banned-phrase pair below: real drafts
+    // carry both and the matcher does not normalize them.
+    assert(
+      hitsOn('straight-idiom', `Let me be straight with you.`) > 0,
+      `straight-idiom gate did NOT flag "let me be straight"`
+    );
+    assert(
+      hitsOn('straight-idiom', `I${'’'}ll be straight about the numbers.`) > 0,
+      `straight-idiom gate did NOT flag the typographic-apostrophe form`
+    );
+    assert(
+      hitsOn('straight-idiom', `I'll be straight about the numbers.`) > 0,
+      `straight-idiom gate did NOT flag the ASCII-apostrophe form`
+    );
+    assert(
+      hitsOn('straight-idiom', `He walked ${STRAIGHT} to the desk.`) > 0,
+      `straight-idiom gate did NOT flag "${STRAIGHT}"`
+    );
+
+    // ---- banned-phrase gate. Probes DERIVED from the loaded tokens. ----
     if (!wordTok || !quoteTok) {
-      failures.push(
+      assert(
+        false,
         `cannot derive probes from banned-phrases.json (word=${!!wordTok} quote=${!!quoteTok}); ` +
           'the self-test would be a no-op, which is the bug it exists to catch'
       );
     } else {
-      const hits = (text) =>
-        checkText(text).filter((v) => v.gate === 'banned-phrase').length;
-
       // a) a banned single word is caught
       const w = literal(wordTok);
-      if (hits(`This ${w} approach.`) === 0)
-        failures.push(`banned word "${w}" was NOT flagged; the gate is enforcing nothing`);
+      assert(
+        hitsOn('banned-phrase', `This ${w} approach.`) > 0,
+        `banned word "${w}" was NOT flagged; the gate is enforcing nothing`
+      );
 
       // b) BOTH apostrophe forms are caught. The matcher does not normalize them,
       //    and real drafts carry both, so one form passing is half a gate.
       const q = literal(quoteTok);
-      if (hits(q) === 0) failures.push(`typographic-apostrophe phrase "${q}" was NOT flagged`);
+      assert(hitsOn('banned-phrase', q) > 0, `typographic-apostrophe phrase "${q}" was NOT flagged`);
       const qAscii = q.replace(/’/g, "'");
-      if (hits(qAscii) === 0) failures.push(`ASCII-apostrophe phrase "${qAscii}" was NOT flagged`);
-
-      // c) clean text is NOT flagged. A join() or boundary-class break can make the
-      //    pattern match everything, which fails outward material for no reason and
-      //    trains everyone to bypass the gate. Over-matching is a gate failure too.
-      if (hits('We shipped the parser on Tuesday. It reads one file and exits.') > 0)
-        failures.push('clean control text WAS flagged; the pattern is over-matching');
+      assert(hitsOn('banned-phrase', qAscii) > 0, `ASCII-apostrophe phrase "${qAscii}" was NOT flagged`);
     }
 
+    // ---- shared control. Clean text must be clean under EVERY gate. ----
+    // A join() or boundary-class break can make a pattern match everything, which fails
+    // outward material for no reason and trains everyone to bypass the gate. Over-matching
+    // is a gate failure too, and it is the failure mode a fires-on-bad-input test misses.
+    const control = 'We shipped the parser on Tuesday. It reads one file and exits.';
+    const controlHits = checkText(control);
+    assert(
+      controlHits.length === 0,
+      `clean control text WAS flagged by [${controlHits.map((v) => v.gate).join(', ')}]; a pattern is over-matching`
+    );
+
     if (failures.length) {
-      console.error('self-test FAILED:');
+      console.error(`self-test FAILED (${failures.length} of ${assertions} assertions):`);
       for (const f of failures) console.error(`  - ${f}`);
       process.exit(1);
     }
-    console.log(`self-test ok: ${_banned.tokens.length} tokens, 4 assertions passed`);
+    console.log(
+      `self-test ok: ${GATES.length} gates, ${_banned.tokens.length} banned tokens, ${assertions} assertions passed`
+    );
     process.exit(0);
+  }
+
+  // Repo-wide sweep: run the gates over every TRACKED text file, honouring
+  // SWEEP_EXCLUSIONS. This is the whole-repo mirror of stack-ops lint-prose.sh step 2,
+  // built on checkText rather than a restated grep, so the sweep and the per-file check
+  // can never disagree about what a violation is.
+  //
+  // Exit 0 clean, 1 on any violation or any rotted exclusion entry, 2 if the file list
+  // could not be obtained (an unrunnable sweep is not a clean one).
+  // Bypass switch: none. The exclusion list is the bypass, and it is reviewable in a diff.
+  if (args.includes('--sweep')) {
+    const ls = spawnSync('git', ['ls-files', '-z'], { encoding: 'utf8' });
+    if (ls.status !== 0) {
+      console.error(`sweep: cannot list tracked files (git ls-files exit ${ls.status}): ${ls.stderr || ''}`.trim());
+      process.exit(2);
+    }
+    const tracked = ls.stdout.split('\0').filter(Boolean);
+    if (tracked.length === 0) {
+      console.error('sweep: git ls-files returned nothing; refusing to report a clean sweep of zero files');
+      process.exit(2);
+    }
+
+    // A stale exclusion is a silent hole: the file it named is gone or renamed, and the
+    // entry sits there looking like considered policy. Fail on it so the list stays honest.
+    const rotted = SWEEP_EXCLUSIONS.filter((e) =>
+      e.path.endsWith('/') ? !tracked.some((f) => f.startsWith(e.path)) : !tracked.includes(e.path)
+    );
+
+    let checked = 0;
+    let skipped = 0;
+    const dirty = [];
+    for (const file of tracked) {
+      if (isSweepExcluded(file)) {
+        skipped += 1;
+        continue;
+      }
+      let text;
+      try {
+        text = readFileSync(file, 'utf8');
+      } catch {
+        continue; // unreadable (submodule, broken symlink): not this detector's job
+      }
+      if (text.includes('\0')) continue; // binary
+      checked += 1;
+      const violations = checkText(text);
+      if (violations.length) dirty.push({ file, violations });
+    }
+
+    for (const { file, violations } of dirty) {
+      for (const v of violations) console.log(`${file}: [${v.gate}] ${v.message} (x${v.count})`);
+    }
+    for (const e of rotted) {
+      console.log(`STALE EXCLUSION: ${e.path} no longer exists (${e.reason}); remove it from SWEEP_EXCLUSIONS`);
+    }
+    if (dirty.length === 0 && rotted.length === 0) {
+      console.log(`CLEAN: ${checked} tracked files pass all voice gates (${skipped} excluded by policy)`);
+      process.exit(0);
+    }
+    console.log(
+      `\n${dirty.length} of ${checked} checked files violate the voice gates ` +
+        `(${skipped} excluded by policy, ${rotted.length} stale exclusions)`
+    );
+    process.exit(1);
   }
 
   // Drift check (regression detector): every playbook file must declare a parseable,
   // schema-valid length_window line; the resilience fallback table must match the playbooks
   // exactly; and every fallback entry must have a live playbook file (catches renames).
-  // Exit 0 clean, 1 on drift. Kill switch: VOICE_GATES_DISABLE_WINDOW_CHECK=true
-  // (documented in AGENTS.md § Detectors, per the every-detector-has-a-kill-switch rule).
+  // Exit 0 clean, 1 on drift. Bypass switch: VOICE_GATES_DISABLE_WINDOW_CHECK=true
+  // (documented in AGENTS.md § Detectors, per the every-detector-documents-its-bypass rule).
   if (args.includes('--check-windows')) {
     if (process.env.VOICE_GATES_DISABLE_WINDOW_CHECK === 'true') {
       console.log('window drift check DISABLED via VOICE_GATES_DISABLE_WINDOW_CHECK=true (no checks ran)');

@@ -45,9 +45,9 @@ FINDING (2026-07-05, RESOLVED 2026-07-06): the 5 content-agent skills declared i
 - Anthropic plugins (first-class): `skill-creator`, `mcp-builder`, `prompt-optimizer`, `prompt-master`, `consolidate-memory`, `engineering:*`.
 - Voice: `make-it-sound-like-mitchell` + `mitchells-voice-style` (global plugins) + CLAUDE.md hard voice rules.
 
-## Detectors (regression checks; every detector documents its kill switch here)
+## Detectors (regression checks; every detector documents its bypass switch here)
 
-| Detector | Command | What it fails on | Kill switch |
+| Detector | Command | What it fails on | Bypass switch |
 |---|---|---|---|
 | Voice/format gates | `node scripts/voice-gates.mjs <file> [--platform <p>] [--published]` | em dash, banned term, banned idioms, platform length window in the given artifact. `--published` strips `:::` marker blocks first so the length gate reports the TRUE published word count (a raw count false-trips the ceiling on drafts with embed markers) | none (core gate; bypassing is a per-invocation choice, not an env flag) |
 | Length-window drift | `node scripts/voice-gates.mjs --check-windows` | playbook missing/unparseable/schema-invalid `length_window:` line; fallback table diverging from playbooks; fallback entry with no playbook file | `VOICE_GATES_DISABLE_WINDOW_CHECK=true` (short-circuits, exit 0, prints a disabled notice) |
@@ -77,5 +77,5 @@ The first Substack launch rebuilt these from an ephemeral scratchpad every sessi
 
 - Skills follow the agentskills.io SKILL.md standard (frontmatter: name, description; body: instructions). Match the structure of the best adopted community skills.
 - Personal data (drafts, story ledger, account handles, engagement analytics) is gitignored — see `.gitignore`. Never commit.
-- No em dashes in any publishable artifact. Banned word: "kill" (use "banned-phrase checklist").
+- No em dashes in any publishable artifact. Banned word: the four-letter k-word for terminate, in any form (use "stop", "end", "remove", "retire"). Named obliquely on purpose so this file stays clean under its own gate.
 - Every KB claim about platform mechanics carries a freshness date (see CLAUDE.md research tiers).
