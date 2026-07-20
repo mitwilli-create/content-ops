@@ -563,6 +563,50 @@ if (isMain) {
     process.exit(1);
   }
 
+  // Staged-files check: the pre-commit hook's entry point. Same gates, same exclusions,
+  // same checkText as --sweep, but scoped to what this commit actually touches.
+  //
+  // Deliberately NOT the full sweep. A hook that fails on dirt in files you did not touch
+  // gets bypassed within a week, and a bypassed gate enforces nothing. The full --sweep is
+  // for CI and for deliberate cleanup passes.
+  //
+  // Content is read from the INDEX (`git show :file`), never the worktree: those differ
+  // whenever a file is partially staged, and checking the worktree copy would let a
+  // violation reach a commit while the hook reported the file clean.
+  //
+  // Exit 0 clean, 1 on violation, 2 if the staged list could not be obtained.
+  if (args.includes('--staged')) {
+    const ls = spawnSync('git', ['diff', '--cached', '--name-only', '--diff-filter=ACM', '-z'], {
+      encoding: 'utf8',
+    });
+    if (ls.status !== 0) {
+      console.error(`staged check: cannot list staged files (git exit ${ls.status}): ${ls.stderr || ''}`.trim());
+      process.exit(2);
+    }
+    const staged = ls.stdout.split('\0').filter(Boolean);
+    let checked = 0;
+    const dirty = [];
+    for (const file of staged) {
+      if (isSweepExcluded(file)) continue;
+      const blob = spawnSync('git', ['show', `:${file}`], { encoding: 'buffer' });
+      if (blob.status !== 0) continue; // not in the index (deleted/renamed away)
+      const buf = blob.stdout;
+      if (buf.includes(0)) continue; // binary
+      checked += 1;
+      const violations = checkText(buf.toString('utf8'));
+      if (violations.length) dirty.push({ file, violations });
+    }
+    if (dirty.length === 0) {
+      console.log(`voice gates CLEAN: ${checked} staged file(s)`);
+      process.exit(0);
+    }
+    for (const { file, violations } of dirty) {
+      for (const v of violations) console.log(`${file}: [${v.gate}] ${v.message} (x${v.count})`);
+    }
+    console.log(`\n${dirty.length} of ${checked} staged file(s) violate the voice gates. Fix, restage, retry.`);
+    process.exit(1);
+  }
+
   // Drift check (regression detector): every playbook file must declare a parseable,
   // schema-valid length_window line; the resilience fallback table must match the playbooks
   // exactly; and every fallback entry must have a live playbook file (catches renames).

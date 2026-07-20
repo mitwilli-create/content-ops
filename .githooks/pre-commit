@@ -1,0 +1,21 @@
+#!/bin/sh
+# content-ops voice gates, per commit. Enabled via: git config core.hooksPath .githooks
+#
+# Two checks, in this order:
+#   1. --self-test  the gates still FIRE on known-bad input. A matcher broken by an
+#                   edit reports every file clean, so this runs first and unconditionally.
+#   2. --staged     the files in THIS commit pass. Scoped to staged content read from
+#                   the index, not a full-repo sweep: a hook that fails on dirt you did
+#                   not touch gets bypassed, and a bypassed gate enforces nothing.
+#
+# Escape hatch is git's own --no-verify, deliberately: one obvious, visible, per-commit
+# action rather than an env var that can be exported once in a shell rc and forgotten.
+set -e
+
+node scripts/voice-gates.mjs --self-test >/dev/null || {
+  echo "voice gates: SELF-TEST FAILED. The gates are not enforcing what they claim."
+  node scripts/voice-gates.mjs --self-test
+  exit 1
+}
+
+node scripts/voice-gates.mjs --staged
