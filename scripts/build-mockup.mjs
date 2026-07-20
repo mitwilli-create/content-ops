@@ -45,7 +45,7 @@ function renderMedia(m, n) {
     const thumb = id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : '';
     return `<figure class="media video">
       ${thumb ? `<div class="thumb" style="background-image:url('${thumb}')"><span class="play">&#9654;</span></div>` : ''}
-      <figcaption>VIDEO ${n}/${mediaCount}: <a href="${escapeHtml(m.target)}">${escapeHtml(m.target)}</a>${m.why ? ` — ${escapeHtml(m.why)}` : ''}</figcaption>
+      <figcaption>VIDEO ${n}/${mediaCount}: <a href="${escapeHtml(m.target)}">${escapeHtml(m.target)}</a>${m.why ? ` (${escapeHtml(m.why)})` : ''}</figcaption>
     </figure>`;
   }
   if (m.type === 'tweet') {
