@@ -1,4 +1,4 @@
-# Personal data — never commit (career-ops pattern)
+# Personal data: never commit (career-ops pattern)
 data/
 drafts/
 memory/accounts.md
@@ -10,7 +10,7 @@ memory/accounts.md
 analytics/
 exports/
 
-# Quarantine inbox — community skills under review are not ours to commit
+# Quarantine inbox: community skills under review are not ours to commit
 .claude/skills-inbox/
 
 # OS / editor noise
