@@ -18,22 +18,35 @@
 # Escape hatch is git's own --no-verify, deliberately: one obvious, visible, per-commit
 # action rather than an env var that can be exported once in a shell rc and forgotten.
 #
-# TWO OPEN ISSUES with the delegated secret scan, both observed 2026-07-20, neither fixed
-# here because changing secret-scanning behavior is Mitchell's call, not this gate's:
+# The two issues previously recorded here as OPEN were root-caused and FIXED upstream on
+# 2026-07-20, in ~/.config/git/hooks/trufflehog-pre-commit. Both had one cause:
 #
-#   a) It appears not to cover staged content. The hook runs `trufflehog git ...
-#      --since-commit HEAD`, which scans COMMITS; at pre-commit time the staged blobs are
-#      not a commit yet. Measured: a file containing a well-formed AWS key pair, staged but
-#      uncommitted, produced exit 0 (no finding) and the commit was allowed through.
+#   git exports GIT_INDEX_FILE (plus GIT_DIR / GIT_WORK_TREE in worktrees) into every
+#   hook's environment. The old secret hook ran `trufflehog git "file://$root"`, and
+#   trufflehog shells out to git internally while cloning the repo to a temp dir. Those
+#   child git processes inherited GIT_INDEX_FILE and wrote into the REAL repo index. The
+#   index silently reverted to HEAD, the hook still exited 0, and git printed a normal
+#   success line while committing a tree that did not match what was staged.
 #
-#   b) Empty-commit hazard in worktrees. Three subagents in git worktrees produced commits
-#      that reported success and contained ZERO files, losing their edits. In one agent
-#      worktree this reproduced reliably and isolated to this hook: with the hook active,
-#      0 files committed; with --no-verify, 1 file; with trufflehog absent from PATH, 1
-#      file. It did NOT reproduce in the main tree, nor in a freshly created worktree at
-#      current HEAD, so the triggering condition is not established and `env -u
-#      GIT_INDEX_FILE` was NOT confirmed as a cure. Treat worktree commits as unverified:
-#      check `git show --name-only` before trusting one.
+#   a) Staged content was not scanned. FIXED. `--since-commit HEAD` scans COMMITS, and at
+#      pre-commit time the staged blobs are not a commit yet. The hook now scans
+#      `git diff --cached` over stdin, so it sees exactly what is being committed.
+#
+#   b) Empty commits in worktrees. FIXED, and it was the same bug, not a separate one. The
+#      earlier note said `env -u GIT_INDEX_FILE` was NOT confirmed as a cure; that has
+#      since been confirmed. It reproduces deterministically once you set GIT_INDEX_FILE
+#      explicitly, which is why it looked worktree-specific: worktrees make git export a
+#      full set of repo pointers, so the leak lands more often there than in the main tree.
+#      The fix applies both defenses, scanning stdin AND unsetting the pointers.
+#
+# Verify with `sh ~/.config/git/hooks/trufflehog-pre-commit --self-test`, which asserts
+# index integrity, commit content, that a staged secret still blocks, and that an
+# untracked secret does not. Run it after touching that hook.
+#
+# Audit note: two commits were lost to this before the fix (5acf249, 4f40dec, both on agent
+# worktree branches, zero files each). That work was redone in 155e09b and 4805f59. To scan
+# for others, flag any commit whose tree equals its parent's tree, excluding git stash
+# entries, whose trees legitimately match.
 set -e
 
 node scripts/voice-gates.mjs --self-test >/dev/null || {
