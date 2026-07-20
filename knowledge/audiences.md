@@ -20,7 +20,7 @@ Every piece targets ONE primary audience. Cross-post adaptations may shift the f
 **Register:** Generous senior peer who remembers being confused.
 
 ## 3. Newly AI-Enabled
-**Who:** Professionals just discovering AI leverage: teachers, tradespeople, small business owners, mid-career folks. Live on TikTok, YouTube, Facebook, LinkedIn, general Reddit.
+**Who:** Professionals just discovering what AI can do for their work: teachers, tradespeople, small business owners, mid-career folks. Live on TikTok, YouTube, Facebook, LinkedIn, general Reddit.
 **What earns their attention:** One concrete problem solved on screen, money/time saved in dollars and hours, "you don't need to be technical" proof, warmth.
 **What dies:** Jargon, dev-culture in-jokes, anything requiring a terminal in the first 60 seconds.
 **Mitchell's edge:** Journalist's translation instinct + genuine democratization conviction. "AI for blue collar workers," "change the law with AI," "live consult with a family member" are made for them.
