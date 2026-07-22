@@ -9,6 +9,7 @@
 //
 // Exports: parseDraft(text) -> { title, subtitle, blocks[], mediaCount }
 //          renderMarkdown(md) -> HTML string   (## / **bold** / [links] / - bullets / > callouts / paragraphs)
+//          splitFrontmatter(text) -> { frontmatter, body }, stripFrontmatter(text) -> body
 //          escapeHtml(s), youtubeId(url)
 
 // Canonical ::: fence test: a block opens with a line beginning `:::` and closes with a bare `:::`.
@@ -28,6 +29,36 @@ export function stripEmbedBlocks(text) {
     kept.push(line);
   }
   return kept.join('\n');
+}
+
+// splitFrontmatter(text) -> { frontmatter: {k:v}|null, body: string }
+// Recognizes a leading YAML frontmatter block: after any leading blank lines, a line that is
+// exactly `---`, closed by a later line that is exactly `---`. Only top-level `key: value` pairs
+// are parsed (surrounding quotes stripped); nested/list lines (e.g. `  - item`) are removed from
+// the body along with the rest of the block but are not parsed into keys. If there is no opening
+// `---`, or no closing `---`, the text is returned unchanged with frontmatter: null. A mid-document
+// `---` horizontal rule is never treated as frontmatter, because it is not the first non-blank line.
+export function splitFrontmatter(text) {
+  const lines = text.split('\n');
+  let i = 0;
+  while (i < lines.length && lines[i].trim() === '') i++;
+  if (i >= lines.length || lines[i].trim() !== '---') return { frontmatter: null, body: text };
+  let j = i + 1;
+  while (j < lines.length && lines[j].trim() !== '---') j++;
+  if (j >= lines.length) return { frontmatter: null, body: text }; // unterminated: not frontmatter
+  const frontmatter = {};
+  for (let k = i + 1; k < j; k++) {
+    const m = lines[k].match(/^([A-Za-z0-9_-]+):\s*(.*)$/);
+    if (m) frontmatter[m[1]] = m[2].trim().replace(/^["']|["']$/g, '');
+  }
+  return { frontmatter, body: lines.slice(j + 1).join('\n') };
+}
+
+// stripFrontmatter(text) -> body with a leading YAML frontmatter block removed (see splitFrontmatter).
+// Used by the published-length count in voice-gates.mjs: frontmatter is editor metadata, never
+// published body text, so counting it false-trips the length window (same rationale as :::blocks).
+export function stripFrontmatter(text) {
+  return splitFrontmatter(text).body;
 }
 
 export function escapeHtml(s) {
@@ -121,18 +152,24 @@ function parseMediaOpen(openLine) {
 //   { kind: 'code', text }        (``` fence body - PUBLISHED verbatim, e.g. the ownership template)
 //   { kind: 'markdown', text }    (a run of prose lines)
 export function parseDraft(text) {
-  const rawLines = text.split('\n');
-  let title = null, subtitle = null;
+  // Strip any leading YAML frontmatter first, and prefer its title/subtitle. Without this, a
+  // frontmatter-headed draft (no `# ` line) rendered the whole ---...--- block as a top paragraph.
+  const { frontmatter, body } = splitFrontmatter(text);
+  const rawLines = body.split('\n');
+  let title = frontmatter && frontmatter.title ? frontmatter.title : null;
+  let subtitle = frontmatter && frontmatter.subtitle ? frontmatter.subtitle : null;
   let start = 0;
-  // Title = first `# ` line; subtitle = the immediately following *italic* line, if present.
+  // Fallback for `# `-headed drafts: title = first `# ` line; subtitle = the immediately following
+  // *italic* line. Frontmatter values (if present) win; the `# ` line is still consumed either way
+  // so it is not rendered twice.
   for (; start < rawLines.length; start++) {
     const l = rawLines[start];
     if (/^\s*$/.test(l)) continue;
     if (/^#\s/.test(l)) {
-      title = l.replace(/^#\s+/, '').trim();
+      if (title === null) title = l.replace(/^#\s+/, '').trim();
       const next = rawLines[start + 1] || '';
       const sub = next.match(/^\*(.+)\*\s*$/);
-      if (sub) { subtitle = sub[1].trim(); start += 1; }
+      if (sub) { if (subtitle === null) subtitle = sub[1].trim(); start += 1; }
       start += 1;
     }
     break;

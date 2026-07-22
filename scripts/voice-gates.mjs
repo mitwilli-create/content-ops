@@ -20,8 +20,8 @@ import { pathToFileURL, fileURLToPath } from 'node:url';
 // so the length gate and the publish tooling share exactly one implementation (CodeRabbit PR #11: avoid a
 // second copy of the ::: parsing that could drift). draft-parse.mjs is pure (no import side effects), so
 // importing it here is safe. Re-exported to keep `voice-gates.stripEmbedBlocks` a stable public entry.
-import { stripEmbedBlocks } from './lib/draft-parse.mjs';
-export { stripEmbedBlocks };
+import { stripEmbedBlocks, stripFrontmatter } from './lib/draft-parse.mjs';
+export { stripEmbedBlocks, stripFrontmatter };
 
 // The banned-term pattern is constructed (not written literally) so this source file itself
 // stays clean under the blanket substring ban (Qodo PR #3 finding 2).
@@ -317,7 +317,11 @@ export function checkLength(text, platform, opts = {}) {
   }
   const win = LENGTH_WINDOWS[norm.platform];
   if (!win) return []; // known platform with no deterministic window (intentional, e.g. hackernews)
-  const target = opts.stripMarkers ? stripEmbedBlocks(text) : text;
+  // Under --published, count the TRUE published body: strip both the leading YAML frontmatter
+  // (editor metadata, never published as body text) and the ::: instruction blocks. checkText
+  // deliberately does NOT strip frontmatter, because the title/subtitle in it DO get published and
+  // must still pass the em-dash/banned-term gates.
+  const target = opts.stripMarkers ? stripEmbedBlocks(stripFrontmatter(text)) : text;
   const words = target.trim().split(/\s+/).filter(Boolean).length;
   const chars = target.length;
   const violations = [];
@@ -666,8 +670,10 @@ if (isMain) {
   }
   const opts = { stripMarkers: published };
   if (published) {
-    const publishedWords = stripEmbedBlocks(text).trim().split(/\s+/).filter(Boolean).length;
-    console.log(`published word count (::: marker blocks stripped): ${publishedWords}`);
+    // Must mirror checkLength's published target exactly (frontmatter + ::: blocks stripped),
+    // or the printed count contradicts the gate decision it is meant to explain.
+    const publishedWords = stripEmbedBlocks(stripFrontmatter(text)).trim().split(/\s+/).filter(Boolean).length;
+    console.log(`published word count (frontmatter + ::: marker blocks stripped): ${publishedWords}`);
   }
   const violations = [...checkText(text, opts), ...(platform ? checkLength(text, platform, opts) : [])];
   if (violations.length === 0) {
